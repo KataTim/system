@@ -3,35 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kata Tim System - 文档访问终端</title>
+    <title>Kata Tim System - 内部研究档案</title>
     <style>
         :root {
-            --bg-deep: #0a0a0f;
-            --bg-card: #111118;
-            --bg-input: #16161f;
-            --border: #1e1e2e;
-            --border-active: #3a3a55;
-            --text: #c8c8d4;
-            --text-dim: #7a7a8e;
-            --text-bright: #e8e8f0;
-            --gold: #b8944b;
-            --gold-light: #d4b86a;
-            --gold-dark: #8a6530;
-            --red: #8b3a3a;
-            --red-light: #c44a4a;
-            --red-glow: #ff444460;
-            --green: #3a7a4a;
-            --green-light: #4da85d;
-            --accent: #5a6a8a;
-            --danger: #c44a4a;
-            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
-            --shadow-gold: 0 0 30px rgba(180, 140, 60, 0.25);
-            --radius: 8px;
-            --radius-lg: 14px;
-            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', 'Courier New', monospace;
-            --font-sans: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
-            --font-display: 'Georgia', 'Noto Serif SC', 'STSong', 'SimSun', serif;
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --bg-deep: #0a0a0c;
+            --bg-panel: #111318;
+            --bg-input: #1a1d25;
+            --text-primary: #c9ccd4;
+            --text-secondary: #8b8f9a;
+            --accent-gold: #c9a96e;
+            --accent-red: #b8404a;
+            --accent-dim: #5a4030;
+            --glow-gold: #e8c878;
+            --glow-red: #d45050;
+            --border-subtle: #2a2d36;
+            --border-active: #4a3d2e;
+            --terminal-green: #3dc06c;
+            --font-mono: 'Courier New', 'Source Code Pro', 'Consolas', monospace;
+            --font-sans: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            --font-serif: 'Noto Serif SC', 'SimSun', 'STSong', serif;
         }
 
         * {
@@ -42,517 +32,322 @@
 
         body {
             background: var(--bg-deep);
-            color: var(--text);
+            color: var(--text-primary);
             font-family: var(--font-sans);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow-x: hidden;
-            background-image:
-                radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, transparent 60%),
-                radial-gradient(ellipse at 30% 80%, #0f0f1a 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 70%, #0d0d18 0%, transparent 50%);
-            background-attachment: fixed;
+            cursor: default;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 背景粒子 */
-        .bg-particles {
+        /* 粒子背景 */
+        #particles-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
             z-index: 0;
-            overflow: hidden;
-        }
-        .bg-particle {
-            position: absolute;
-            border-radius: 50%;
-            background: var(--gold);
-            opacity: 0;
-            animation: floatUp 12s infinite ease-in;
-        }
-        @keyframes floatUp {
-            0% {
-                transform: translateY(105vh) translateX(0);
-                opacity: 0;
-            }
-            5% {
-                opacity: 0.6;
-            }
-            30% {
-                opacity: 0.15;
-            }
-            70% {
-                opacity: 0.05;
-            }
-            100% {
-                transform: translateY(-10vh) translateX(60px);
-                opacity: 0;
-            }
+            pointer-events: none;
+            opacity: 0.55;
         }
 
-        /* 主容器 */
-        .app-container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 560px;
-            padding: 20px;
-            perspective: 1000px;
-        }
-
-        /* 登录卡片 */
-        .login-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 40px 32px 32px;
-            box-shadow: var(--shadow-lg);
-            transition: all var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-        .login-card::before {
-            content: '';
-            position: absolute;
+        /* 扫描线覆盖 */
+        .scanlines {
+            position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold-dark), var(--gold), var(--gold-dark), transparent);
-            opacity: 0.6;
-        }
-        .login-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #1a1a30, #2a2a40, #1a1a30, transparent);
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.03) 2px,
+                    rgba(0, 0, 0, 0.03) 4px);
             opacity: 0.4;
         }
 
-        /* 系统标题 */
-        .system-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        .system-logo {
-            width: 56px;
-            height: 56px;
-            margin: 0 auto 14px;
-            border: 2px solid var(--gold-dark);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* 主容器 */
+        .main-container {
             position: relative;
-            background: radial-gradient(circle at center, #1a1a25 0%, #0d0d16 100%);
-            box-shadow: 0 0 20px rgba(180, 140, 60, 0.2);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
-        .system-logo .taiji {
+
+        /* 卡片面板 */
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.7),
+                0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+                0 0 80px rgba(180, 130, 60, 0.06);
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .panel.expanded {
+            max-width: 820px;
+        }
+
+        /* 顶部八卦装饰 */
+        .bagua-decor {
+            text-align: center;
+            margin-bottom: 24px;
             font-size: 28px;
-            color: var(--gold);
-            line-height: 1;
+            letter-spacing: 8px;
+            opacity: 0.5;
+            color: var(--accent-gold);
             user-select: none;
+            animation: subtlePulse 3s ease-in-out infinite;
         }
+
+        @keyframes subtlePulse {
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* 标题 */
         .system-title {
-            font-family: var(--font-display);
-            font-size: 1.6rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            color: var(--text-bright);
-            margin-bottom: 2px;
+            text-align: center;
+            margin-bottom: 6px;
+            font-family: var(--font-serif);
+            font-size: 1.8em;
+            letter-spacing: 3px;
+            color: var(--accent-gold);
+            font-weight: 400;
+            user-select: none;
+            text-shadow: 0 0 40px rgba(200, 160, 80, 0.3);
         }
+
         .system-subtitle {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            text-align: center;
+            font-size: 0.75em;
+            letter-spacing: 4px;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+            user-select: none;
             font-family: var(--font-mono);
         }
 
-        /* 表单 */
-        .form-group {
+        /* 分隔线 */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border-subtle);
+            margin: 20px 0;
+            position: relative;
+        }
+        .divider::after {
+            content: '◆';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            padding: 0 12px;
+            color: var(--accent-dim);
+            font-size: 10px;
+        }
+
+        /* 输入组 */
+        .input-group {
             margin-bottom: 18px;
         }
-        .form-label {
+        .input-group label {
             display: block;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-dim);
-            margin-bottom: 6px;
+            font-size: 0.78em;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            margin-bottom: 7px;
             font-family: var(--font-mono);
+            text-transform: uppercase;
         }
-        .form-input {
+        .input-group input {
             width: 100%;
             padding: 12px 16px;
             background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text-bright);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            color: var(--text-primary);
             font-family: var(--font-mono);
-            font-size: 0.9rem;
-            letter-spacing: 0.04em;
-            transition: all var(--transition);
+            font-size: 0.95em;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
             outline: none;
         }
-        .form-input:focus {
+        .input-group input:focus {
             border-color: var(--border-active);
-            box-shadow: 0 0 0 3px rgba(180, 140, 60, 0.08);
-            background: #1a1a28;
+            box-shadow: 0 0 20px rgba(180, 130, 60, 0.15), 0 0 0 1px rgba(180, 130, 60, 0.2);
+            background: #1f222d;
         }
-        .form-input::placeholder {
-            color: #44445a;
-            letter-spacing: 0.02em;
-        }
-        .form-input.key-input {
-            text-align: center;
-            letter-spacing: 0.08em;
-            font-size: 1rem;
-            text-transform: uppercase;
-        }
-
-        /* 密钥协议链接 */
-        .protocol-link {
-            display: inline-block;
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            cursor: pointer;
-            letter-spacing: 0.06em;
-            font-family: var(--font-mono);
-            text-decoration: none;
-            transition: color var(--transition);
-            margin-top: 2px;
-            user-select: none;
-            border-bottom: 1px dashed transparent;
-            padding-bottom: 1px;
-        }
-        .protocol-link:hover {
-            color: var(--gold-light);
-            border-bottom-color: var(--gold-dark);
-        }
-        .protocol-link.active {
-            color: var(--gold);
-            border-bottom-color: var(--gold);
-        }
-
-        /* 高级密钥区域 */
-        .advanced-key-section {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin 0.35s ease;
-            opacity: 0;
-            margin-top: 0;
-        }
-        .advanced-key-section.expanded {
-            max-height: 120px;
-            opacity: 1;
-            margin-top: 14px;
-        }
-        .advanced-key-inner {
-            background: #0d0d18;
-            border: 1px solid #1a1a2e;
-            border-radius: var(--radius);
-            padding: 16px;
-            border-left: 2px solid var(--gold-dark);
-        }
-        .advanced-key-label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--gold);
-            font-family: var(--font-mono);
-            margin-bottom: 8px;
+        .input-group input::placeholder {
+            color: #4a4d58;
+            letter-spacing: 1px;
         }
 
         /* 按钮 */
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            display: inline-block;
             padding: 12px 28px;
+            border-radius: 4px;
             font-family: var(--font-mono);
-            font-size: 0.8rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            border: none;
-            border-radius: var(--radius);
+            letter-spacing: 2px;
+            font-size: 0.85em;
             cursor: pointer;
-            transition: all var(--transition);
-            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 1px solid transparent;
             user-select: none;
             text-decoration: none;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #1a1a28, #222238);
-            color: var(--text-bright);
-            border: 1px solid var(--border-active);
+            background: transparent;
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
             width: 100%;
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, #222238, #2a2a42);
-            border-color: #555577;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            transform: translateY(-1px);
+            background: rgba(200, 160, 80, 0.1);
+            box-shadow: 0 0 30px rgba(200, 160, 80, 0.25);
+            border-color: var(--glow-gold);
+            color: var(--glow-gold);
         }
-        .btn-primary:active {
-            transform: translateY(0);
-            box-shadow: none;
+        .btn-protocol {
+            background: transparent;
+            border: 1px dashed var(--accent-red);
+            color: var(--accent-red);
+            width: 100%;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            font-size: 0.8em;
+            padding: 10px 20px;
+        }
+        .btn-protocol:hover {
+            background: rgba(180, 60, 60, 0.1);
+            box-shadow: 0 0 25px rgba(200, 70, 70, 0.2);
+            border-color: var(--glow-red);
+            color: #e86060;
+        }
+        .btn-small {
+            padding: 8px 18px;
+            font-size: 0.75em;
+            letter-spacing: 1px;
+            border-radius: 3px;
         }
         .btn-danger {
             background: transparent;
-            color: var(--red-light);
-            border: 1px solid var(--red);
-            font-size: 0.7rem;
-            padding: 8px 18px;
-            letter-spacing: 0.05em;
+            border-color: #6b3030;
+            color: #c87070;
         }
         .btn-danger:hover {
-            background: #1a1010;
-            border-color: var(--red-light);
-            box-shadow: 0 0 15px var(--red-glow);
+            background: rgba(160, 50, 50, 0.15);
+            border-color: #a04040;
+            box-shadow: 0 0 20px rgba(180, 50, 50, 0.2);
         }
-        .btn-mail {
+        .btn-back {
             background: transparent;
-            color: #7a9ab8;
-            border: 1px solid #3a4a5a;
-            font-size: 0.68rem;
-            padding: 9px 16px;
-            letter-spacing: 0.04em;
-            white-space: nowrap;
+            border-color: var(--border-subtle);
+            color: var(--text-secondary);
         }
-        .btn-mail:hover {
-            background: #101820;
-            border-color: #5a7a9a;
-            color: #a0c0dd;
-            box-shadow: 0 0 12px rgba(90, 120, 160, 0.3);
-        }
-        .btn-sm {
-            padding: 7px 14px;
-            font-size: 0.65rem;
-            letter-spacing: 0.05em;
+        .btn-back:hover {
+            border-color: #555;
+            color: #ccc;
+            background: rgba(255, 255, 255, 0.03);
         }
 
         /* 消息提示 */
-        .alert {
+        .message {
             padding: 12px 16px;
-            border-radius: var(--radius);
-            font-size: 0.75rem;
-            letter-spacing: 0.03em;
-            margin-top: 14px;
-            display: none;
-            font-family: var(--font-mono);
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease;
-        }
-        .alert.show {
-            display: block;
-        }
-        .alert-error {
-            background: #1a0f0f;
-            border: 1px solid #3a1a1a;
-            color: #d4a0a0;
-        }
-        .alert-success {
-            background: #0f1a0f;
-            border: 1px solid #1a3a1a;
-            color: #a0d4a0;
-        }
-        .alert-warning {
-            background: #1a1a0f;
-            border: 1px solid #3a3a1a;
-            color: #d4c8a0;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-6px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* 文档面板 */
-        .docs-panel {
-            display: none;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-            animation: fadeIn 0.4s ease;
-        }
-        .docs-panel.show {
-            display: block;
-        }
-        .docs-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            background: #0d0d16;
-        }
-        .docs-header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .docs-title {
-            font-family: var(--font-display);
-            font-size: 1.1rem;
-            color: var(--text-bright);
-            letter-spacing: 0.04em;
-        }
-        .user-badge {
-            font-size: 0.6rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            letter-spacing: 0.06em;
-            font-family: var(--font-mono);
-            text-transform: uppercase;
-        }
-        .user-badge.basic {
-            background: #1a1a20;
-            border: 1px solid #3a3a50;
-            color: #9a9ab0;
-        }
-        .user-badge.advanced {
-            background: #1a1408;
-            border: 1px solid #5a4015;
-            color: #d4b86a;
-            box-shadow: 0 0 8px rgba(180, 140, 60, 0.2);
-        }
-        .docs-body {
-            padding: 8px 0;
-            max-height: 55vh;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-        }
-        .docs-body::-webkit-scrollbar {
-            width: 4px;
-        }
-        .docs-body::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .docs-body::-webkit-scrollbar-thumb {
-            background: #2a2a3a;
             border-radius: 4px;
-        }
-        .doc-item {
-            padding: 16px 24px;
-            border-bottom: 1px solid #15151f;
-            cursor: pointer;
-            transition: background var(--transition);
-            position: relative;
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-        }
-        .doc-item:hover {
-            background: #151520;
-        }
-        .doc-item.locked {
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-        .doc-item.locked:hover {
-            background: transparent;
-            opacity: 0.75;
-        }
-        .doc-icon {
-            flex-shrink: 0;
-            width: 36px;
-            height: 36px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            background: #1a1a25;
-            border: 1px solid #2a2a3a;
-        }
-        .doc-icon.locked-icon {
-            background: #1a1010;
-            border-color: #3a1a1a;
-            color: #8b4a4a;
-        }
-        .doc-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .doc-item-title {
-            font-weight: 600;
-            color: var(--text-bright);
-            font-size: 0.85rem;
-            letter-spacing: 0.03em;
-            margin-bottom: 3px;
-            font-family: var(--font-sans);
-        }
-        .doc-item-meta {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            letter-spacing: 0.04em;
+            margin-top: 14px;
+            font-size: 0.8em;
+            letter-spacing: 1px;
+            display: none;
             font-family: var(--font-mono);
         }
-        .doc-item-summary {
-            font-size: 0.7rem;
-            color: #6a6a7e;
-            margin-top: 4px;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .message.error {
+            display: block;
+            background: rgba(180, 40, 40, 0.15);
+            border: 1px solid rgba(200, 60, 60, 0.4);
+            color: #e88080;
         }
-        .lock-indicator {
-            font-size: 0.6rem;
-            color: #7a4a4a;
-            letter-spacing: 0.05em;
-            font-family: var(--font-mono);
-            flex-shrink: 0;
-            align-self: center;
+        .message.success {
+            display: block;
+            background: rgba(40, 140, 60, 0.12);
+            border: 1px solid rgba(60, 180, 80, 0.35);
+            color: #70c880;
+        }
+        .message.info {
+            display: block;
+            background: rgba(140, 120, 40, 0.1);
+            border: 1px solid rgba(180, 150, 60, 0.3);
+            color: #c9a96e;
         }
 
-        /* 文档详情模态框 */
+        /* 邮件链接 */
+        .mail-link {
+            color: #c97070;
+            text-decoration: none;
+            border-bottom: 1px dotted #c97070;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .mail-link:hover {
+            color: #f09090;
+            border-bottom-color: #f09090;
+            text-shadow: 0 0 10px rgba(200, 80, 80, 0.5);
+        }
+
+        /* 模态框覆盖 */
         .modal-overlay {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             z-index: 100;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            animation: fadeIn 0.25s ease;
-        }
-        .modal-overlay.show {
             display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
         }
-        .modal-content {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            max-width: 680px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s ease;
+        .modal-overlay.hidden {
+            display: none;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .modal-panel {
+            background: #15171f;
+            border: 1px solid #3a2020;
+            border-radius: 8px;
+            padding: 36px 30px;
+            width: 90%;
+            max-width: 440px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(180, 40, 40, 0.15);
+            position: relative;
+            animation: slideUp 0.35s ease;
         }
         @keyframes slideUp {
             from {
@@ -564,926 +359,764 @@
                 opacity: 1;
             }
         }
-        .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            background: var(--bg-card);
-            z-index: 1;
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        .modal-panel .modal-title {
+            text-align: center;
+            font-family: var(--font-serif);
+            color: #d4a0a0;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
         }
-        .modal-title {
-            font-family: var(--font-display);
-            font-size: 1rem;
-            color: var(--text-bright);
-            letter-spacing: 0.04em;
-        }
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 1px solid #3a3a50;
-            background: transparent;
-            color: #9a9ab0;
+        .modal-panel .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #777;
+            font-size: 1.5em;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-        }
-        .modal-close:hover {
-            background: #1a1a28;
-            color: #fff;
-            border-color: #5a5a70;
-        }
-        .modal-body {
-            padding: 20px 24px;
-            line-height: 1.7;
-            font-size: 0.85rem;
-            color: #c0c0d0;
-            white-space: pre-wrap;
+            transition: color 0.3s;
             font-family: var(--font-sans);
-            letter-spacing: 0.02em;
         }
-        .modal-body .classification-stamp {
-            display: inline-block;
-            padding: 4px 12px;
-            border: 1px solid var(--red);
-            color: var(--red-light);
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+        .modal-panel .close-btn:hover {
+            color: #ccc;
+        }
+
+        /* 文档列表 */
+        .doc-list-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .doc-list-container.visible {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        .doc-list-header {
+            font-family: var(--font-serif);
+            color: var(--accent-gold);
+            letter-spacing: 2px;
             margin-bottom: 16px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        .doc-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .doc-card:hover {
+            border-color: var(--border-active);
+            box-shadow: 0 0 20px rgba(180, 130, 60, 0.1);
+            background: #1f2230;
+            transform: translateX(3px);
+        }
+        .doc-card .doc-title {
+            font-family: var(--font-serif);
+            font-size: 0.95em;
+            color: #d4c4a8;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .doc-card .doc-meta {
+            font-size: 0.7em;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            letter-spacing: 1px;
+        }
+        .doc-card .doc-classification {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.65em;
+            letter-spacing: 2px;
+            font-family: var(--font-mono);
+            padding: 4px 10px;
+            border-radius: 2px;
+        }
+        .classification-top-secret {
+            background: rgba(180, 40, 40, 0.2);
+            color: #d47070;
+            border: 1px solid rgba(180, 40, 40, 0.4);
+        }
+        .classification-confidential {
+            background: rgba(180, 130, 30, 0.15);
+            color: #c9a040;
+            border: 1px solid rgba(180, 130, 30, 0.35);
+        }
+        .classification-internal {
+            background: rgba(100, 140, 100, 0.12);
+            color: #80a880;
+            border: 1px solid rgba(100, 140, 100, 0.3);
+        }
+
+        /* 文档详情 */
+        .doc-detail-view {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .doc-detail-view.visible {
+            display: block;
+        }
+        .doc-detail-content {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 24px 22px;
+            margin-top: 16px;
+            font-family: var(--font-serif);
+            line-height: 1.9;
+            letter-spacing: 0.5px;
+            color: #bfc3cc;
+            max-height: 55vh;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 0.9em;
+        }
+        .doc-detail-content::-webkit-scrollbar {
+            width: 5px;
+        }
+        .doc-detail-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .doc-detail-content::-webkit-scrollbar-thumb {
+            background: #2a2d36;
             border-radius: 3px;
         }
 
-        /* Toast */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 200;
-            padding: 12px 20px;
-            border-radius: var(--radius);
+        /* 无权限页面 */
+        .no-access-view {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        .no-access-view.visible {
+            display: block;
+        }
+        .no-access-icon {
+            font-size: 4em;
+            margin-bottom: 16px;
+            opacity: 0.6;
+            user-select: none;
+        }
+
+        /* 用户信息条 */
+        .user-info-bar {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 0.75em;
+            letter-spacing: 1px;
             font-family: var(--font-mono);
-            font-size: 0.7rem;
-            letter-spacing: 0.04em;
-            animation: slideInRight 0.35s ease, fadeOut 0.4s ease 2.5s forwards;
-            pointer-events: none;
-            max-width: 400px;
         }
-        @keyframes slideInRight {
-            from {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .user-info-bar.visible {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
+        .user-info-bar .level-badge {
+            padding: 3px 10px;
+            border-radius: 2px;
+            font-size: 0.85em;
+            letter-spacing: 2px;
         }
-        .toast-error {
-            background: #1a0a0a;
-            border: 1px solid #4a1a1a;
-            color: #e0a0a0;
+        .badge-basic {
+            background: rgba(140, 140, 140, 0.15);
+            color: #999;
+            border: 1px solid #444;
         }
-        .toast-success {
-            background: #0a1a0a;
-            border: 1px solid #1a4a1a;
-            color: #a0e0a0;
+        .badge-advanced {
+            background: rgba(200, 160, 60, 0.18);
+            color: #d4b860;
+            border: 1px solid #6b5530;
         }
 
         /* 响应式 */
         @media (max-width: 600px) {
-            .login-card {
-                padding: 28px 18px 22px;
-                border-radius: 10px;
-            }
-            .docs-header {
-                padding: 14px 16px;
-            }
-            .doc-item {
-                padding: 12px 16px;
-                gap: 10px;
+            .panel {
+                padding: 28px 18px;
+                border-radius: 4px;
             }
             .system-title {
-                font-size: 1.3rem;
+                font-size: 1.3em;
+                letter-spacing: 2px;
             }
-            .btn {
-                padding: 10px 20px;
-                font-size: 0.7rem;
+            .system-subtitle {
+                font-size: 0.65em;
+                letter-spacing: 2px;
             }
-            .modal-content {
-                max-height: 90vh;
-                border-radius: 10px;
+            .bagua-decor {
+                font-size: 20px;
+                letter-spacing: 5px;
             }
-            .modal-body {
-                padding: 14px 16px;
-                font-size: 0.78rem;
+            .doc-card .doc-classification {
+                position: static;
+                transform: none;
+                display: inline-block;
+                margin-top: 6px;
+            }
+            .modal-panel {
+                padding: 24px 16px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- 背景粒子 -->
-    <div class="bg-particles" id="bgParticles"></div>
+    <!-- 粒子背景 -->
+    <canvas id="particles-canvas"></canvas>
+    <!-- 扫描线 -->
+    <div class="scanlines"></div>
 
-    <!-- Toast容器 -->
-    <div id="toastContainer"></div>
+    <!-- 主容器 -->
+    <div class="main-container" id="mainContainer">
+        <div class="panel" id="mainPanel">
+            <!-- 八卦装饰 -->
+            <div class="bagua-decor">☰ ☷ ☵ ☲ ☳ ☴ ☶ ☱</div>
 
-    <!-- 主应用容器 -->
-    <div class="app-container" id="appContainer">
+            <!-- 系统标题 -->
+            <div class="system-title">Kata Tim System</div>
+            <div class="system-subtitle">· 内部研究档案 · 灵魂数字化项目 ·</div>
 
-        <!-- ==================== 登录卡片 ==================== -->
-        <div class="login-card" id="loginCard">
-            <div class="system-header">
-                <div class="system-logo">
-                    <span class="taiji">☯</span>
+            <!-- 登录表单 -->
+            <div id="loginForm">
+                <div class="input-group">
+                    <label for="username">用户名 / Username</label>
+                    <input type="text" id="username" placeholder="输入用户名..." autocomplete="off">
                 </div>
-                <h1 class="system-title">Kata Tim System</h1>
-                <p class="system-subtitle">Document Access Terminal v3.7</p>
-            </div>
-
-            <!-- 用户名 -->
-            <div class="form-group">
-                <label class="form-label" for="username">用户标识 / Username</label>
-                <input type="text" class="form-input" id="username" placeholder="输入用户名" autocomplete="off" spellcheck="false">
-            </div>
-
-            <!-- 普通密钥输入 -->
-            <div class="form-group" id="basicKeyGroup">
-                <label class="form-label" for="basicKey">访问密钥 / Access Key</label>
-                <input type="text" class="form-input key-input" id="basicKey"
-                placeholder="XXXX-XXXX-XXXX"
-                maxlength="14"
-                autocomplete="off"
-                spellcheck="false"
-                style="text-transform: uppercase;">
-                <span class="protocol-link" id="protocolToggle" title="点击进入高级密钥协议">
-                    ▶ 密钥协议
-                </span>
-            </div>
-
-            <!-- 高级密钥区域（默认隐藏） -->
-            <div class="advanced-key-section" id="advancedKeySection">
-                <div class="advanced-key-inner">
-                    <div class="advanced-key-label">🔑 高级协议密钥 / Protocol Key</div>
-                    <input type="text" class="form-input key-input" id="advancedKey"
-                    placeholder="XXX-XXXX-XXXX-XXXX-XXXX"
-                    maxlength="27"
-                    autocomplete="off"
-                    spellcheck="false"
-                    style="text-transform: uppercase; border-color: #3a2a10;">
-                    <span class="protocol-link active" id="protocolBack" title="返回普通密钥模式" style="margin-top:6px;">
-                        ◀ 返回普通登录
-                    </span>
+                <div class="input-group">
+                    <label for="accessKey">内部密钥 / Access Key</label>
+                    <input type="text" id="accessKey" placeholder="XXXX-XXXX-XXXX" autocomplete="off">
                 </div>
+                <button class="btn btn-primary" id="btnLogin" onclick="handleLogin()">
+                    验证身份 · 进入系统
+                </button>
+                <button class="btn btn-protocol" id="btnProtocol" onclick="openProtocolModal()">
+                    🔐 密钥协议 · 高级授权
+                </button>
+                <div id="loginMessage" class="message"></div>
             </div>
 
-            <!-- 登录按钮 -->
-            <button class="btn btn-primary" id="loginBtn" style="margin-top:6px;">
-                ⚡ 验证身份
-            </button>
+            <!-- 用户信息条 -->
+            <div class="user-info-bar" id="userInfoBar">
+                <span id="userDisplayName"></span>
+                <span class="level-badge" id="userLevelBadge"></span>
+                <button class="btn btn-small btn-back" onclick="handleLogout()">退出登录</button>
+            </div>
 
-            <!-- 错误/提示消息 -->
-            <div class="alert alert-error" id="alertBox"></div>
-
-            <!-- 邮件跳转按钮（无效密钥时显示） -->
-            <div id="mailBtnContainer" style="text-align:center; margin-top:10px; display:none;">
-                <a class="btn btn-mail" id="mailBtn" href="#" target="_blank">
-                    📧 发送邮件至 kata.tim.sys@gmail.com
-                </a>
-                <p style="font-size:0.6rem;color:#5a5a70;margin-top:6px;letter-spacing:0.04em;font-family:var(--font-mono);">
-                    若密钥无效，请通过邮件申请有效密钥
+            <!-- 无权限视图 -->
+            <div class="no-access-view" id="noAccessView">
+                <div class="no-access-icon">🔒</div>
+                <p style="font-family:var(--font-serif);color:#b0a090;letter-spacing:1px;margin-bottom:8px;">
+                    您的密钥权限级别不足
                 </p>
+                <p style="font-size:0.75em;color:var(--text-secondary);letter-spacing:1px;margin-bottom:16px;">
+                    当前密钥为<strong>普通级别</strong>，无法访问文档档案库。<br>
+                    如需获取高级授权，请使用
+                    <span style="color:var(--accent-gold);">密钥协议</span> 通道。
+                </p>
+                <button class="btn btn-protocol btn-small" onclick="openProtocolModal()">
+                    🔐 前往密钥协议
+                </button>
             </div>
-        </div>
 
-        <!-- ==================== 文档面板（登录后显示） ==================== -->
-        <div class="docs-panel" id="docsPanel">
-            <div class="docs-header">
-                <div class="docs-header-left">
-                    <span style="font-size:1.3rem;">☯</span>
-                    <span class="docs-title">文档库</span>
-                    <span class="user-badge basic" id="userBadge">BASIC</span>
-                </div>
-                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                    <span style="font-size:0.65rem;color:var(--text-dim);font-family:var(--font-mono);" id="loggedUserDisplay"></span>
-                    <button class="btn btn-danger btn-sm" id="logoutBtn">退出</button>
-                </div>
+            <!-- 文档列表视图 -->
+            <div class="doc-list-container" id="docListView">
+                <div class="doc-list-header">📁 档案目录 · 机密文档</div>
+                <div id="docListInner"></div>
             </div>
-            <div class="docs-body" id="docsBody">
-                <div style="text-align:center;padding:40px;color:var(--text-dim);">
-                    <span style="font-size:2rem;display:block;margin-bottom:10px;">⏳</span>
-                    正在加载文档列表...
-                </div>
+
+            <!-- 文档详情视图 -->
+            <div class="doc-detail-view" id="docDetailView">
+                <button class="btn btn-small btn-back" onclick="backToDocList()" style="margin-bottom:12px;">
+                    ← 返回档案目录
+                </button>
+                <div class="doc-detail-content" id="docDetailContent"></div>
             </div>
         </div>
     </div>
 
-    <!-- ==================== 文档详情模态框 ==================== -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-title" id="modalTitle">文档详情</span>
-                <button class="modal-close" id="modalClose">✕</button>
+    <!-- 高级密钥协议模态框 -->
+    <div class="modal-overlay hidden" id="protocolModal">
+        <div class="modal-panel">
+            <button class="close-btn" onclick="closeProtocolModal()">✕</button>
+            <div class="modal-title">🔐 密钥协议 · 高级授权验证</div>
+            <p style="text-align:center;font-size:0.7em;color:var(--text-secondary);letter-spacing:1px;margin-bottom:18px;font-family:var(--font-mono);">
+                仅限授权研究人员 · 五段式密钥
+            </p>
+            <div class="input-group">
+                <label for="advUsername">用户名</label>
+                <input type="text" id="advUsername" placeholder="输入用户名..." autocomplete="off">
             </div>
-            <div class="modal-body" id="modalBody"></div>
+            <div class="input-group">
+                <label for="advKey">高级密钥</label>
+                <input type="text" id="advKey" placeholder="XXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off">
+            </div>
+            <button class="btn btn-primary" onclick="handleAdvancedLogin()" style="border-color:#b8404a;color:#d4a0a0;">
+                验证高级密钥
+            </button>
+            <div id="advMessage" class="message"></div>
+            <div style="text-align:center;margin-top:12px;font-size:0.7em;">
+                <span style="color:var(--text-secondary);">密钥无效？</span>
+                <a class="mail-link" href="mailto:kata.tim.sys@gmail.com?subject=高级密钥验证失败 - 请求协助&body=请描述您遇到的问题：%0A%0A用户名：%0A使用的密钥：%0A%0A---%0A此邮件来自 Kata Tim System 登录页面"
+                    target="_blank">
+                    联系系统管理员 ↗
+                </a>
+            </div>
         </div>
     </div>
 
     <script>
-        (function() {
-            // ==================== DOM引用 ====================
-            const loginCard = document.getElementById('loginCard');
-            const docsPanel = document.getElementById('docsPanel');
-            const docsBody = document.getElementById('docsBody');
-            const alertBox = document.getElementById('alertBox');
-            const mailBtnContainer = document.getElementById('mailBtnContainer');
-            const mailBtn = document.getElementById('mailBtn');
-            const loginBtn = document.getElementById('loginBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const usernameInput = document.getElementById('username');
-            const basicKeyInput = document.getElementById('basicKey');
-            const advancedKeyInput = document.getElementById('advancedKey');
-            const protocolToggle = document.getElementById('protocolToggle');
-            const protocolBack = document.getElementById('protocolBack');
-            const advancedKeySection = document.getElementById('advancedKeySection');
-            const basicKeyGroup = document.getElementById('basicKeyGroup');
-            const userBadge = document.getElementById('userBadge');
-            const loggedUserDisplay = document.getElementById('loggedUserDisplay');
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalBody = document.getElementById('modalBody');
-            const modalClose = document.getElementById('modalClose');
-            const toastContainer = document.getElementById('toastContainer');
-            const bgParticles = document.getElementById('bgParticles');
-            const appContainer = document.getElementById('appContainer');
+        // ==================== 全局状态 ====================
+        let currentUser = null; // null | { username, level, name }
+        let allDocuments = [];
+        let allAccounts = [];
+        let currentDocId = null;
 
-            // ==================== 状态 ====================
-            let accountsData = [];
-            let documentsData = [];
-            let currentUser = null; // 当前登录用户
-            let isAdvancedMode = false; // 是否展开高级密钥区域
-            let dataLoaded = false;
-            let loginCardVisible = true;
+        // ==================== 粒子背景 ====================
+        (function initParticles() {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            const maxParticles = 55;
 
-            // ==================== 背景粒子生成 ====================
-            function createBgParticles() {
-                const count = 35;
-                const fragment = document.createDocumentFragment();
-                for (let i = 0; i < count; i++) {
-                    const particle = document.createElement('div');
-                    particle.classList.add('bg-particle');
-                    const size = Math.random() * 3 + 1;
-                    particle.style.width = size + 'px';
-                    particle.style.height = size + 'px';
-                    particle.style.left = Math.random() * 100 + '%';
-                    particle.style.animationDuration = (Math.random() * 16 + 8) + 's';
-                    particle.style.animationDelay = (Math.random() * 14) + 's';
-                    particle.style.background = Math.random() < 0.5 ?
-                        'rgba(180,140,60,' + (Math.random() * 0.5 + 0.2) + ')' :
-                        'rgba(160,160,180,' + (Math.random() * 0.3 + 0.1) + ')';
-                    fragment.appendChild(particle);
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            class Particle {
+                constructor() {
+                    this.reset();
                 }
-                bgParticles.appendChild(fragment);
-            }
-            createBgParticles();
-
-            // ==================== Toast ====================
-            function showToast(message, type = 'error') {
-                const toast = document.createElement('div');
-                toast.className = 'toast toast-' + type;
-                toast.textContent = message;
-                toastContainer.appendChild(toast);
-                setTimeout(() => {
-                    if (toast.parentNode) toast.parentNode.removeChild(toast);
-                }, 3200);
-            }
-
-            // ==================== Alert消息 ====================
-            function showAlert(message, type = 'error') {
-                alertBox.className = 'alert alert-' + type + ' show';
-                alertBox.textContent = message;
-            }
-
-            function hideAlert() {
-                alertBox.className = 'alert';
-                alertBox.textContent = '';
-            }
-
-            function showMailButton(show) {
-                mailBtnContainer.style.display = show ? 'block' : 'none';
-                if (show) {
-                    // 更新mailto链接
-                    const subject = encodeURIComponent('密钥验证失败 - 请求协助');
-                    const body = encodeURIComponent(
-                        '我在使用Kata Tim System时遇到了密钥验证问题。\n\n' +
-                        '使用的用户名: ' + (usernameInput.value || '(未填写)') + '\n' +
-                        '密钥: ' + (isAdvancedMode ? advancedKeyInput.value : basicKeyInput.value) + '\n\n' +
-                        '请协助解决。\n'
-                    );
-                    mailBtn.href = 'mailto:kata.tim.sys@gmail.com?subject=' + subject + '&body=' + body;
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 1.8 + 0.4;
+                    this.speedX = (Math.random() - 0.5) * 0.35;
+                    this.speedY = (Math.random() - 0.5) * 0.35;
+                    this.opacity = Math.random() * 0.5 + 0.15;
+                    this.fadeSpeed = Math.random() * 0.004 + 0.002;
+                    this.fadingOut = Math.random() > 0.5;
                 }
-            }
-
-            // ==================== 加载JSON数据 ====================
-            async function loadJSONFiles() {
-                try {
-                    // 尝试从相对路径加载（GitHub Pages同目录）
-                    const [accountsRes, docsRes] = await Promise.all([
-                        fetch('./accounts.json').catch(() => null),
-                        fetch('./documents.json').catch(() => null)
-                    ]);
-
-                    if (accountsRes && accountsRes.ok) {
-                        const data = await accountsRes.json();
-                        accountsData = data.accounts || [];
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.fadingOut) {
+                        this.opacity -= this.fadeSpeed;
+                        if (this.opacity <= 0.05) this.fadingOut = false;
                     } else {
-                        // 使用内嵌默认数据
-                        console.warn('无法加载accounts.json，使用默认数据');
-                        accountsData = getDefaultAccounts();
+                        this.opacity += this.fadeSpeed;
+                        if (this.opacity >= 0.6) this.fadingOut = true;
                     }
-
-                    if (docsRes && docsRes.ok) {
-                        const data = await docsRes.json();
-                        documentsData = data.documents || [];
-                    } else {
-                        console.warn('无法加载documents.json，使用默认数据');
-                        documentsData = getDefaultDocuments();
+                    if (this.x < -10 || this.x > canvas.width + 10 ||
+                        this.y < -10 || this.y > canvas.height + 10) {
+                        this.reset();
                     }
-
-                    dataLoaded = true;
-                    console.log('数据加载完成。账户数:', accountsData.length, '文档数:', documentsData.length);
-                } catch (err) {
-                    console.error('加载JSON失败:', err);
-                    accountsData = getDefaultAccounts();
-                    documentsData = getDefaultDocuments();
-                    dataLoaded = true;
-                    showToast('使用离线数据模式', 'success');
+                }
+                draw() {
+                    ctx.fillStyle = `rgba(190,150,100,${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
                 }
             }
 
-            function getDefaultAccounts() {
-                return [
-                    { username: 'zhang_wei', key: '003-5KUG-KB2Z-5XNF-3DJS', level: 'advanced',
-                    name: '张伟' },
-                    { username: 'li_ming', key: 'XK7B-NQ2R-8FWP', level: 'basic', name: '李明' },
-                    { username: 'chen_fang', key: 'YH3M-VP8K-4DQS', level: 'basic', name: '陈芳' },
-                    { username: 'wang_lei', key: 'ZR9T-WB5N-6JLX', level: 'basic', name: '王磊' },
-                    { username: 'guest', key: 'GUES-TACC-ESSK', level: 'basic', name: '访客' },
-                ];
+            for (let i = 0; i < maxParticles; i++) {
+                particles.push(new Particle());
             }
 
-            function getDefaultDocuments() {
-                return [
-                    {
-                        id: 'DOC-001',
-                        title: '灵魂数字化上传实验报告 #17',
-                        category: '实验报告',
-                        date: '2024-03-15',
-                        summary: '通过道家离魂法术结合量子纠缠原理，成功将一名自愿者的部分意识映射至Minecraft服务器节点。',
-                        content: '【机密文档 - 仅限高级协议持有者查阅】\n\n' +
-                            '实验编号: KTS-EXP-017\n' +
-                            '日期: 2024年3月15日\n' +
-                            '地点: 未公开设施 / Minecraft服务器节点 "Ethereal-7"\n' +
-                            '主持: Kata Tim 研究组\n\n' +
-                            '== 实验概述 ==\n' +
-                            '本次实验旨在验证道家"离魂"法术与量子数据映射技术的兼容性。' +
-                            '实验对象为一名45岁男性自愿者（代号: Soul-017），在深度冥想状态下，' +
-                            '通过特定符文阵列与量子纠缠设备建立连接。\n\n' +
-                            '== 过程记录 ==\n' +
-                            '22:00 - 实验对象进入深度冥想，脑波监测显示Theta波显著增强。\n' +
-                            '22:17 - 符文阵列激活，检测到异常电磁波动，频率约7.83Hz（舒曼共振）。\n' +
-                            '22:34 - Minecraft服务器检测到未知实体登录，坐标(X: -1842, Y: 64, Z: 3271)。\n' +
-                            '22:41 - 该实体在游戏内展现出非玩家预期的行为模式，包括自动建造复杂结构。\n' +
-                            '23:05 - 实验对象报告"看到方块世界"，意识部分映射成功。\n' +
-                            '23:30 - 逐步切断连接，实体从服务器消失。实验对象苏醒，报告了详细的游戏内体验。\n\n' +
-                            '== 结论 ==\n' +
-                            '灵魂数字化上传在技术上是可行的。道家法术提供了意识脱离肉体的路径，' +
-                            '而量子映射设备则将其转化为Minecraft服务器可识别的数据流。' +
-                            '需要进一步研究长期映射的安全性。\n\n' +
-                            '== 风险提示 ==\n' +
-                            '若映射过程中断不彻底，可能导致意识碎片残留在服务器中，形成"游魂实体"。',
-                        classification: '机密'
-                    }, {
-                        id: 'DOC-002',
-                        title: '事故报告：远程操控致死事件 #KTS-INC-09',
-                        category: '事故报告',
-                        date: '2024-05-02',
-                        summary: '一名Minecraft玩家在游戏中遭遇异常实体攻击，现实世界中同步发生心脏骤停。疑似灵魂映射技术被恶意利用。',
-                        content: '【事故报告 - 最高机密】\n\n' +
-                            '事故编号: KTS-INC-09\n' +
-                            '日期: 2024年5月2日\n' +
-                            '涉及服务器: "CrimsonCraft" 公共Minecraft服务器\n' +
-                            '受害者: 匿名（23岁男性，游戏ID: FrostB1ade）\n\n' +
-                            '== 事件描述 ==\n' +
-                            '受害者在游戏内位于坐标(456, 71, -1203)处进行采矿活动时，' +
-                            '突然遭遇一个外观异常的游戏实体。该实体呈现半透明状，移动方式不符合任何已知Mob的AI模式。' +
-                            '实体接近受害者角色后，受害者现实世界中突然倒地，被室友发现时已无心跳。\n' +
-                            '急救人员到场后宣布死亡，死因诊断为"急性心律失常，原因不明"。\n\n' +
-                            '== 调查发现 ==\n' +
-                            '1. 服务器日志显示该异常实体的数据包结构与KTS实验中的"映射实体"高度相似。\n' +
-                            '2. 受害者电脑中发现异常网络流量，指向一个已知的KTS中继节点。\n' +
-                            '3. 游戏内实体在受害者死亡后约47秒自行消失，未留下可追踪的数据痕迹。\n' +
-                            '4. 法医报告指出受害者心脏组织出现罕见的细胞凋亡模式，' +
-                            '与强烈电磁辐射暴露后的损伤特征一致。\n\n' +
-                            '== 推测 ==\n' +
-                            '攻击者可能利用了灵魂映射技术，将自身意识或"游魂实体"定向投送至目标玩家附近，' +
-                            '通过某种未知的量子共振效应，将游戏内的伤害转化为现实世界的生理损伤。' +
-                            '这种"隔空杀人"手段极为隐蔽，难以追踪。\n\n' +
-                            '== 建议 ==\n' +
-                            '立即对所有KTS中继节点进行安全审查。加强对公共Minecraft服务器的监控。' +
-                            '研究防御性符文阵列以保护玩家免受此类攻击。',
-                        classification: '最高机密'
-                    }, {
-                        id: 'DOC-003',
-                        title: '研究笔记：道家符咒与游戏内伤害的量子对应关系',
-                        category: '研究笔记',
-                        date: '2024-04-18',
-                        summary: '探讨特定道家符咒在Minecraft游戏环境中产生的异常效应，以及灵魂通过游戏媒介影响现实的理论模型。',
-                        content: '【研究笔记 - 机密】\n\n' +
-                            '作者: Kata Tim 高级研究员\n' +
-                            '日期: 2024年4月18日\n\n' +
-                            '== 核心理论 ==\n' +
-                            '道家符咒本质上是一种信息编码系统。每个符咒的笔画结构对应特定的能量频率模式。' +
-                            '当这些符咒在特定环境下被激活时，它们会改变局部空间的量子信息场。\n\n' +
-                            'Minecraft作为一个高度结构化的数字世界，其区块数据本质上也是信息编码。' +
-                            '我们发现，某些道家符咒的频率模式与Minecraft的区块更新算法存在共振点。\n' +
-                            '这意味着——至少在理论上——符咒的能量可以在游戏世界中产生可测量的效应。\n\n' +
-                            '== 关键发现 ==\n' +
-                            '1. "五雷符"在游戏内对应坐标处引发异常的雷暴频率。\n' +
-                            '2. "镇魂符"可导致游戏内敌对Mob的行为异常（停止移动、无法攻击）。\n' +
-                            '3. "摄魂符"与灵魂映射技术结合后，可显著增强映射信号的稳定性。\n' +
-                            '4. 反向推论：游戏内的伤害事件（如玩家角色死亡）可能通过量子共振' +
-                            '反向影响现实世界中与该玩家有灵魂连接的人。\n\n' +
-                            '== 警告 ==\n' +
-                            '这种双向影响机制意味着Minecraft服务器可能被武器化。' +
-                            '一个技术精湛的操作者可以在游戏中"杀死"一个角色，' +
-                            '并通过量子共振效应在现实世界中造成真实的生理伤害。' +
-                            '这正是KTS-INC系列事故的根本原因。',
-                        classification: '机密'
-                    }, {
-                        id: 'DOC-004',
-                        title: '灵魂映射技术标准操作协议 v2.1',
-                        category: '技术文档',
-                        date: '2024-02-28',
-                        summary: 'Kata Tim System灵魂数字化上传的标准操作流程、安全规范及应急处理方案。',
-                        content: '【技术文档 - 机密】\n\n' +
-                            '文档编号: KTS-SOP-021\n' +
-                            '版本: 2.1\n' +
-                            '生效日期: 2024年2月28日\n\n' +
-                            '== 第一章：准备工作 ==\n' +
-                            '1. 确认Minecraft服务器已安装KTS专用中继插件。\n' +
-                            '2. 检查量子纠缠设备的状态指示灯（应为蓝色常亮）。\n' +
-                            '3. 在实验区域布置防护符文阵列（至少三层）。\n' +
-                            '4. 实验对象需进行至少48小时的冥想准备。\n\n' +
-                            '== 第二章：映射流程 ==\n' +
-                            '1. 实验对象进入冥想舱，佩戴脑波同步头盔。\n' +
-                            '2. 激活符文阵列，从最外层开始逐层激活。\n' +
-                            '3. 启动量子纠缠设备，设定目标服务器IP及坐标。\n' +
-                            '4. 监控脑波数据，当Theta波占比超过60%时启动映射。\n' +
-                            '5. 映射过程持续30-90分钟，期间需持续监控"游魂指数"。\n' +
-                            '6. 若游魂指数超过阈值(>75)，立即执行紧急脱出程序。\n\n' +
-                            '== 第三章：紧急脱出 ==\n' +
-                            '1. 反向激活符文阵列（从内层向外层）。\n' +
-                            '2. 向量子设备发送"强制断开"指令。\n' +
-                            '3. 使用"归魂符"引导实验对象意识回归。\n' +
-                            '4. 在服务器端执行 /kts-purge 命令清除残留数据。\n\n' +
-                            '== 第四章：安全警告 ==\n' +
-                            '绝对禁止在未布置防护符文的情况下进行映射实验。\n' +
-                            '绝对禁止将映射目标设定为有其他玩家在线的坐标。\n' +
-                            '绝对禁止连续映射超过90分钟。\n' +
-                            '违反以上规定可能导致"游魂实体"的产生或KTS-INC类型事故。',
-                        classification: '机密'
-                    }, {
-                        id: 'DOC-005',
-                        title: '事故报告：游魂实体失控事件 #KTS-INC-14',
-                        category: '事故报告',
-                        date: '2024-06-11',
-                        summary: '一个未彻底清除的游魂实体在多个Minecraft服务器间迁移，导致3名玩家遭遇不明伤害。',
-                        content: '【事故报告 - 最高机密】\n\n' +
-                            '事故编号: KTS-INC-14\n' +
-                            '日期: 2024年6月11日\n' +
-                            '涉及服务器: 多个（跨服务器迁移）\n' +
-                            '受影响人数: 3人（1人死亡，2人住院）\n\n' +
-                            '== 事件描述 ==\n' +
-                            '2024年6月8日，KTS-EXP-023实验后，操作员未正确执行/kts-purge命令，' +
-                            '导致一个游魂实体残留在服务器中。该实体展现出异常的自主行为，' +
-                            '在48小时内跨越了4个不同的Minecraft服务器。\n' +
-                            '6月11日，3名在不同服务器游玩的玩家报告遭遇"幽灵实体"，' +
-                            '随后在现实世界中出现了不同程度的生理不适。其中一名17岁玩家' +
-                            '在游戏内被该实体"触碰"后，现实世界中突发脑出血，经抢救无效死亡。\n\n' +
-                            '== 调查结论 ==\n' +
-                            '游魂实体具有跨服务器迁移能力，可能利用了Minecraft服务器的UDP协议漏洞。' +
-                            '该实体似乎保留了一定程度的"意图"，会主动寻找玩家进行交互。' +
-                            '其"触碰"行为在现实世界中可转化为严重的生理损伤，机制尚不完全明确。\n\n' +
-                            '== 补救措施 ==\n' +
-                            '已部署KTS-防火墙插件v3.0至所有已知受影响服务器。' +
-                            '该游魂实体已于6月12日被追踪并成功清除。' +
-                            '相关操作员已被暂停实验资格。',
-                        classification: '最高机密'
-                    }, {
-                        id: 'DOC-006',
-                        title: '理论论文：道家"元神"概念与数字意识的哲学思考',
-                        category: '研究笔记',
-                        date: '2024-01-10',
-                        summary: '从道家哲学角度探讨灵魂数字化上传的本质，以及"元神"在虚拟世界中的存在形式。',
-                        content: '【研究笔记 - 内部参考】\n\n' +
-                            '作者: Kata Tim 理论组\n' +
-                            '日期: 2024年1月10日\n\n' +
-                            '== 摘要 ==\n' +
-                            '道家经典中提及的"元神"概念与现代数字意识理论存在惊人的相似之处。' +
-                            '元神被认为是超越肉体的意识核心，在道教修炼中可以通过特定方法实现"元神出窍"。' +
-                            '这与Kata Tim System的灵魂映射技术在本质上高度一致。\n\n' +
-                            '== 核心论点 ==\n' +
-                            '1. 元神即信息：元神可以被理解为一种高度结构化的量子信息集合。\n' +
-                            '2. 虚拟世界即"洞天"：道家传说中的洞天福地可能是对高维空间的隐喻，' +
-                            '而Minecraft等虚拟世界在某种意义上是人工构建的"洞天"。\n' +
-                            '3. 映射即"出窍"：灵魂映射技术本质上是用技术手段实现了道家的"元神出窍"。\n' +
-                            '4. 游魂即"执念"：未清除的游魂实体类似于道家所说的"执念残魂"。\n\n' +
-                            '== 哲学警示 ==\n' +
-                            '道家强调"道法自然"，任何违背自然规律的操作都可能带来不可预知的后果。' +
-                            'KTS技术虽然取得了突破性进展，但我们必须谨慎行事。' +
-                            '灵魂不应被随意上传、复制或操控。',
-                        classification: '内部参考'
-                    },
-                ];
-            }
-
-            // ==================== 密钥格式化 ====================
-            function formatBasicKey(raw) {
-                // 移除所有非允许字符，转大写
-                const cleaned = raw.toUpperCase().replace(/[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g, '');
-                // 每4个字符后加连字符，最多3段
-                let formatted = '';
-                for (let i = 0; i < cleaned.length && i < 12; i++) {
-                    if (i > 0 && i % 4 === 0) formatted += '-';
-                    formatted += cleaned[i];
-                }
-                return formatted;
-            }
-
-            function formatAdvancedKey(raw) {
-                const cleaned = raw.toUpperCase().replace(/[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g, '');
-                // 第一段3字符，后面每段4字符，共5段（3+4+4+4+4=19字符）
-                let formatted = '';
-                let pos = 0;
-                const segments = [3, 4, 4, 4, 4];
-                for (let seg = 0; seg < segments.length; seg++) {
-                    if (seg > 0) formatted += '-';
-                    for (let j = 0; j < segments[seg] && pos < cleaned.length; j++) {
-                        formatted += cleaned[pos];
-                        pos++;
-                    }
-                }
-                return formatted;
-            }
-
-            // 基本密钥输入自动格式化
-            basicKeyInput.addEventListener('input', function() {
-                const cursorPos = this.selectionStart;
-                const beforeLen = this.value.length;
-                const formatted = formatBasicKey(this.value);
-                this.value = formatted;
-                // 尝试保持光标位置
-                const afterLen = formatted.length;
-                const newCursorPos = cursorPos + (afterLen - beforeLen);
-                this.setSelectionRange(Math.min(newCursorPos, afterLen), Math.min(newCursorPos,
-                    afterLen));
-            });
-
-            // 高级密钥输入自动格式化
-            advancedKeyInput.addEventListener('input', function() {
-                const cursorPos = this.selectionStart;
-                const beforeLen = this.value.length;
-                const formatted = formatAdvancedKey(this.value);
-                this.value = formatted;
-                const afterLen = formatted.length;
-                const newCursorPos = cursorPos + (afterLen - beforeLen);
-                this.setSelectionRange(Math.min(newCursorPos, afterLen), Math.min(newCursorPos,
-                    afterLen));
-            });
-
-            // ==================== 密钥协议切换 ====================
-            protocolToggle.addEventListener('click', function() {
-                isAdvancedMode = true;
-                advancedKeySection.classList.add('expanded');
-                protocolToggle.style.display = 'none';
-                basicKeyGroup.style.opacity = '0.5';
-                basicKeyInput.style.borderColor = '#1e1e2e';
-                advancedKeyInput.focus();
-                hideAlert();
-                showMailButton(false);
-            });
-
-            protocolBack.addEventListener('click', function() {
-                isAdvancedMode = false;
-                advancedKeySection.classList.remove('expanded');
-                protocolToggle.style.display = 'inline-block';
-                basicKeyGroup.style.opacity = '1';
-                basicKeyInput.style.borderColor = '';
-                basicKeyInput.focus();
-                advancedKeyInput.value = '';
-                hideAlert();
-                showMailButton(false);
-            });
-
-            // ==================== 登录验证 ====================
-            function validateLogin(username, key, isAdvanced) {
-                if (!username.trim()) {
-                    return { success: false, reason: 'empty_username', message: '请输入用户名。' };
-                }
-                if (!key.trim()) {
-                    return { success: false, reason: 'empty_key',
-                        message: '请输入访问密钥。' + (isAdvanced ? '（高级协议密钥格式：XXX-XXXX-XXXX-XXXX-XXXX）' :
-                            '（格式：XXXX-XXXX-XXXX）') };
-                }
-
-                // 验证密钥格式
-                if (isAdvanced) {
-                    // 高级密钥格式：3-4-4-4-4（共19字符+4连字符=23字符）
-                    const advancedPattern = /^[A-HJ-NP-Z2-9]{3}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
-                    if (!advancedPattern.test(key.toUpperCase())) {
-                        return { success: false, reason: 'invalid_format',
-                            message: '高级密钥格式无效。正确格式：XXX-XXXX-XXXX-XXXX-XXXX（5段，使用指定字符集）。' };
-                    }
-                } else {
-                    // 普通密钥格式：4-4-4（共12字符+2连字符=14字符）
-                    const basicPattern = /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
-                    if (!basicPattern.test(key.toUpperCase())) {
-                        return { success: false, reason: 'invalid_format',
-                            message: '密钥格式无效。正确格式：XXXX-XXXX-XXXX（3段，每段4字符，仅使用指定字符集）。请检查输入。' };
-                    }
-                }
-
-                // 在accounts中查找匹配
-                const normalizedKey = key.toUpperCase().trim();
-                const normalizedUsername = username.trim();
-                const account = accountsData.find(acc =>
-                    acc.username === normalizedUsername && acc.key.toUpperCase().trim() === normalizedKey
-                );
-
-                if (!account) {
-                    return { success: false, reason: 'no_match',
-                        message: '用户名与密钥不匹配，或该密钥未在系统中注册。请检查输入或联系管理员获取有效密钥。' };
-                }
-
-                // 如果用户使用高级密钥区域但匹配到的是basic账户
-                if (isAdvanced && account.level === 'basic') {
-                    return { success: false, reason: 'level_mismatch',
-                        message: '该密钥为普通权限密钥，请在普通登录界面使用。高级协议密钥需单独申请。' };
-                }
-                // 如果用户使用普通区域但匹配到的是advanced账户
-                if (!isAdvanced && account.level === 'advanced') {
-                    return { success: false, reason: 'level_mismatch_advanced',
-                        message: '该账户为高级协议账户，请点击下方"密钥协议"使用高级密钥登录。' };
-                }
-
-                return { success: true, account: account };
-            }
-
-            // ==================== 登录按钮事件 ====================
-            loginBtn.addEventListener('click', function() {
-                const username = usernameInput.value.trim();
-                const key = isAdvancedMode ? advancedKeyInput.value.trim() : basicKeyInput.value.trim();
-
-                hideAlert();
-                showMailButton(false);
-
-                const result = validateLogin(username, key, isAdvancedMode);
-
-                if (!result.success) {
-                    showAlert(result.message, 'error');
-                    if (result.reason === 'no_match' || result.reason === 'invalid_format') {
-                        showMailButton(true);
-                    }
-                    // 震动效果
-                    loginCard.style.transform = 'translateX(-4px)';
-                    setTimeout(() => { loginCard.style.transform = 'translateX(4px)'; }, 60);
-                    setTimeout(() => { loginCard.style.transform = 'translateX(-3px)'; }, 120);
-                    setTimeout(() => { loginCard.style.transform = 'translateX(2px)'; }, 180);
-                    setTimeout(() => { loginCard.style.transform = ''; }, 240);
-                    return;
-                }
-
-                // 登录成功
-                currentUser = result.account;
-                showLoginSuccess(result.account);
-            });
-
-            // 回车键登录
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && loginCardVisible) {
-                    e.preventDefault();
-                    loginBtn.click();
-                }
-            });
-
-            // ==================== 登录成功 ====================
-            function showLoginSuccess(account) {
-                hideAlert();
-                showMailButton(false);
-                showToast('身份验证成功！欢迎，' + (account.name || account.username), 'success');
-
-                // 延迟切换界面
-                setTimeout(() => {
-                    loginCard.style.display = 'none';
-                    loginCardVisible = false;
-                    docsPanel.classList.add('show');
-                    appContainer.style.maxWidth = '720px';
-
-                    // 更新用户信息
-                    loggedUserDisplay.textContent = account.name || account.username;
-                    if (account.level === 'advanced') {
-                        userBadge.textContent = 'ADVANCED';
-                        userBadge.className = 'user-badge advanced';
-                    } else {
-                        userBadge.textContent = 'BASIC';
-                        userBadge.className = 'user-badge basic';
-                    }
-
-                    // 渲染文档列表
-                    renderDocsList(account.level);
-                }, 350);
-            }
-
-            // ==================== 退出登录 ====================
-            logoutBtn.addEventListener('click', function() {
-                currentUser = null;
-                docsPanel.classList.remove('show');
-                loginCard.style.display = '';
-                loginCardVisible = true;
-                appContainer.style.maxWidth = '560px';
-                usernameInput.value = '';
-                basicKeyInput.value = '';
-                advancedKeyInput.value = '';
-                if (isAdvancedMode) {
-                    protocolBack.click(); // 重置为普通模式
-                }
-                hideAlert();
-                showMailButton(false);
-                docsBody.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">' +
-                    '<span style="font-size:2rem;display:block;margin-bottom:10px;">⏳</span>正在加载文档列表...</div>';
-                showToast('已安全退出系统', 'success');
-            });
-
-            // ==================== 渲染文档列表 ====================
-            function renderDocsList(userLevel) {
-                if (!documentsData.length) {
-                    docsBody.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">' +
-                        '<span style="font-size:2rem;display:block;margin-bottom:10px;">📭</span>文档库为空</div>';
-                    return;
-                }
-
-                let html = '';
-                documentsData.forEach((doc, index) => {
-                    const isAccessible = userLevel === 'advanced';
-                    const lockClass = isAccessible ? '' : ' locked';
-                    const iconClass = isAccessible ? '' : ' locked-icon';
-                    const iconSymbol = isAccessible ?
-                        (doc.category === '事故报告' ? '⚠' : '📄') :
-                        '🔒';
-
-                    html += `
-                <div class="doc-item${lockClass}" data-doc-index="${index}" data-accessible="${isAccessible}">
-                  <div class="doc-icon${iconClass}">${iconSymbol}</div>
-                  <div class="doc-info">
-                    <div class="doc-item-title">${escapeHTML(doc.title)}</div>
-                    <div class="doc-item-meta">${escapeHTML(doc.category)} · ${escapeHTML(doc.date)} · ${escapeHTML(doc.id)}</div>
-                    <div class="doc-item-summary">${escapeHTML(doc.summary)}</div>
-                  </div>
-                  ${!isAccessible ? '<span class="lock-indicator">🔒 需高级权限</span>' : ''}
-                </div>`;
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
                 });
-
-                docsBody.innerHTML = html;
-
-                // 绑定点击事件
-                docsBody.querySelectorAll('.doc-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        const docIndex = parseInt(this.getAttribute('data-doc-index'));
-                        const accessible = this.getAttribute('data-accessible') === 'true';
-
-                        if (!accessible) {
-                            showToast('您当前的密钥权限不足以查看此文档。请使用高级协议密钥登录。',
-                                'error');
-                            // 轻微闪烁效果
-                            const lockIndicator = this.querySelector('.lock-indicator');
-                            if (lockIndicator) {
-                                lockIndicator.style.color = '#ff6666';
-                                setTimeout(() => { lockIndicator.style.color = '#7a4a4a'; },
-                                    400);
-                            }
-                            return;
-                        }
-
-                        // 打开文档详情
-                        openDocumentModal(documentsData[docIndex]);
-                    });
-                });
+                requestAnimationFrame(animate);
             }
-
-            function escapeHTML(str) {
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
-
-            // ==================== 文档详情模态框 ====================
-            function openDocumentModal(doc) {
-                modalTitle.textContent = doc.title;
-                let bodyHTML = '';
-                bodyHTML +=
-                    '<span class="classification-stamp">' + escapeHTML(doc.classification || '机密') +
-                    '</span>';
-                bodyHTML += '<p style="color:#7a7a8e;font-size:0.7rem;font-family:var(--font-mono);margin-bottom:14px;">' +
-                    escapeHTML(doc.category) + ' · ' + escapeHTML(doc.date) + ' · ' + escapeHTML(doc.id) +
-                    '</p>';
-                bodyHTML += '<div style="white-space:pre-wrap;line-height:1.8;">' + escapeHTML(doc.content) +
-                    '</div>';
-                modalBody.innerHTML = bodyHTML;
-                modalOverlay.classList.add('show');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeModal() {
-                modalOverlay.classList.remove('show');
-                document.body.style.overflow = '';
-                modalBody.innerHTML = '';
-            }
-
-            modalClose.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', function(e) {
-                if (e.target === modalOverlay) {
-                    closeModal();
-                }
-            });
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
-                    closeModal();
-                }
-            });
-
-            // ==================== 初始化 ====================
-            async function init() {
-                showToast('正在连接 Kata Tim System...', 'success');
-                await loadJSONFiles();
-                // 清除初始toast（由后续toast覆盖）
-                setTimeout(() => {
-                    const toasts = toastContainer.querySelectorAll('.toast');
-                    if (toasts.length > 1 && toasts[0].textContent.includes('正在连接')) {
-                        toasts[0].remove();
-                    }
-                }, 1500);
-                console.log('Kata Tim System 初始化完成。');
-                console.log('普通密钥格式示例: XK7B-NQ2R-8FWP (3段，每段4字符)');
-                console.log('高级密钥: 003-5KUG-KB2Z-5XNF-3DJS (5段)');
-                console.log('字符集: ABCDEFGHJKLMNPQRSTUVWXYZ23456789 (不含I、O、0、1)');
-            }
-
-            init();
-
-            // ==================== 暴露到全局用于调试 ====================
-            window.KataTimSystem = {
-                getAccounts: () => accountsData,
-                getDocuments: () => documentsData,
-                getCurrentUser: () => currentUser,
-                getDataLoaded: () => dataLoaded,
-                generateRandomKey: function() {
-                    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-                    const seg1 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars
-                        .length)]).join('');
-                    const seg2 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars
-                        .length)]).join('');
-                    const seg3 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars
-                        .length)]).join('');
-                    return `${seg1}-${seg2}-${seg3}`;
-                },
-            };
-
-            console.log('%c Kata Tim System %c已就绪 %c☯',
-                'color:#d4b86a;font-size:1.2em;',
-                'color:#c8c8d4;',
-                'color:#b8944b;font-size:1.4em;');
-            console.log('%cwindow.KataTimSystem.generateRandomKey() %c可生成普通密钥',
-                'color:#9a9ab0;font-family:monospace;',
-                'color:#7a7a8e;');
+            animate();
         })();
+
+        // ==================== 数据加载 ====================
+        async function loadJSONFiles() {
+            try {
+                const [accountsRes, documentsRes] = await Promise.all([
+                    fetch('./accounts.json'),
+                    fetch('./documents.json')
+                ]);
+                if (!accountsRes.ok || !documentsRes.ok) {
+                    throw new Error('JSON文件加载失败');
+                }
+                const accountsData = await accountsRes.json();
+                const documentsData = await documentsRes.json();
+                allAccounts = accountsData.users || [];
+                allDocuments = documentsData.documents || [];
+                console.log(`[KTS] 已加载 ${allAccounts.length} 个账号, ${allDocuments.length} 份文档`);
+            } catch (err) {
+                console.error('[KTS] 数据加载错误:', err);
+                showLoginMessage('系统数据加载失败，请刷新页面重试。', 'error');
+            }
+        }
+
+        // ==================== 工具函数 ====================
+        function showLoginMessage(msg, type) {
+            const el = document.getElementById('loginMessage');
+            el.textContent = msg;
+            el.className = 'message ' + type;
+        }
+
+        function showAdvMessage(msg, type) {
+            const el = document.getElementById('advMessage');
+            el.textContent = msg;
+            el.className = 'message ' + type;
+        }
+
+        function clearLoginMessage() {
+            const el = document.getElementById('loginMessage');
+            el.className = 'message';
+            el.textContent = '';
+        }
+
+        function clearAdvMessage() {
+            const el = document.getElementById('advMessage');
+            el.className = 'message';
+            el.textContent = '';
+        }
+
+        // 普通密钥格式验证 (三段式: XXXX-XXXX-XXXX)
+        function isValidBasicKeyFormat(key) {
+            return /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key);
+        }
+
+        // 高级密钥格式验证 (五段式: XXX-XXXX-XXXX-XXXX-XXXX)
+        function isValidAdvancedKeyFormat(key) {
+            return /^[A-Z0-9]{3,4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key);
+        }
+
+        // 在账号列表中查找匹配
+        function findAccount(username, key) {
+            return allAccounts.find(
+                acc => acc.username.toLowerCase() === username.toLowerCase() && acc.key === key
+            );
+        }
+
+        // ==================== 登录逻辑 ====================
+        function handleLogin() {
+            clearLoginMessage();
+            const username = document.getElementById('username').value.trim();
+            const key = document.getElementById('accessKey').value.trim();
+
+            if (!username || !key) {
+                showLoginMessage('请填写用户名和密钥。', 'error');
+                return;
+            }
+
+            // 检查是否是高级密钥格式（五段式）在普通登录中使用
+            if (isValidAdvancedKeyFormat(key) && !isValidBasicKeyFormat(key)) {
+                showLoginMessage('检测到高级密钥格式。请点击下方「密钥协议」按钮使用高级授权通道。', 'info');
+                return;
+            }
+
+            const account = findAccount(username, key);
+
+            if (!account) {
+                // 密钥无效
+                const mailtoLink =
+                    `mailto:kata.tim.sys@gmail.com?subject=密钥验证失败 - 请求协助&body=您好，%0A%0A我在尝试登录 Kata Tim System 时遇到密钥验证失败。%0A%0A用户名：${encodeURIComponent(username)}%0A使用的密钥：${encodeURIComponent(key)}%0A%0A请协助解决。%0A%0A---%0A此邮件来自 Kata Tim System 登录页面`;
+                showLoginMessage(
+                    `密钥无效或用户名不匹配。如需协助，请 ` +
+                    `<a class="mail-link" href="${mailtoLink}" target="_blank">发送邮件给系统管理员 ↗</a>`,
+                    'error'
+                );
+                return;
+            }
+
+            // 登录成功
+            currentUser = {
+                username: account.username,
+                level: account.level,
+                name: account.name || account.username
+            };
+            updateUIForLoggedInUser();
+            showLoginMessage('', '');
+            clearLoginMessage();
+        }
+
+        function handleAdvancedLogin() {
+            clearAdvMessage();
+            const username = document.getElementById('advUsername').value.trim();
+            const key = document.getElementById('advKey').value.trim();
+
+            if (!username || !key) {
+                showAdvMessage('请填写用户名和高级密钥。', 'error');
+                return;
+            }
+
+            if (!isValidAdvancedKeyFormat(key)) {
+                showAdvMessage('密钥格式不正确。高级密钥为五段式：XXX-XXXX-XXXX-XXXX-XXXX', 'error');
+                return;
+            }
+
+            const account = findAccount(username, key);
+
+            if (!account) {
+                const mailtoLink =
+                    `mailto:kata.tim.sys@gmail.com?subject=高级密钥验证失败 - 请求协助&body=您好，%0A%0A我在 Kata Tim System 的高级密钥协议验证中失败。%0A%0A用户名：${encodeURIComponent(username)}%0A高级密钥：${encodeURIComponent(key)}%0A%0A请协助解决。%0A%0A---%0A此邮件来自 Kata Tim System 密钥协议页面`;
+                showAdvMessage(
+                    `高级密钥验证失败。如需协助，请 ` +
+                    `<a class="mail-link" href="${mailtoLink}" target="_blank">发送邮件给系统管理员 ↗</a>`,
+                    'error'
+                );
+                return;
+            }
+
+            if (account.level !== 'advanced') {
+                showAdvMessage('该密钥为普通级别，无法通过高级授权。请使用普通登录入口。', 'error');
+                return;
+            }
+
+            // 高级登录成功
+            currentUser = {
+                username: account.username,
+                level: account.level,
+                name: account.name || account.username
+            };
+            closeProtocolModal();
+            updateUIForLoggedInUser();
+            clearLoginMessage();
+        }
+
+        // ==================== UI更新 ====================
+        function updateUIForLoggedInUser() {
+            const loginForm = document.getElementById('loginForm');
+            const userInfoBar = document.getElementById('userInfoBar');
+            const noAccessView = document.getElementById('noAccessView');
+            const docListView = document.getElementById('docListView');
+            const docDetailView = document.getElementById('docDetailView');
+            const mainPanel = document.getElementById('mainPanel');
+
+            // 隐藏登录表单
+            loginForm.style.display = 'none';
+
+            // 显示用户信息条
+            userInfoBar.classList.add('visible');
+            document.getElementById('userDisplayName').textContent =
+                `👤 ${currentUser.name} (${currentUser.username})`;
+            const badge = document.getElementById('userLevelBadge');
+            if (currentUser.level === 'advanced') {
+                badge.textContent = '高级授权';
+                badge.className = 'level-badge badge-advanced';
+            } else {
+                badge.textContent = '普通授权';
+                badge.className = 'level-badge badge-basic';
+            }
+
+            // 根据级别显示不同内容
+            if (currentUser.level === 'advanced') {
+                noAccessView.classList.remove('visible');
+                docDetailView.classList.remove('visible');
+                docListView.classList.add('visible');
+                mainPanel.classList.add('expanded');
+                renderDocList();
+            } else {
+                docListView.classList.remove('visible');
+                docDetailView.classList.remove('visible');
+                noAccessView.classList.add('visible');
+                mainPanel.classList.remove('expanded');
+            }
+
+            // 存储到sessionStorage
+            sessionStorage.setItem('kts_user', JSON.stringify(currentUser));
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            sessionStorage.removeItem('kts_user');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('userInfoBar').classList.remove('visible');
+            document.getElementById('noAccessView').classList.remove('visible');
+            document.getElementById('docListView').classList.remove('visible');
+            document.getElementById('docDetailView').classList.remove('visible');
+            document.getElementById('mainPanel').classList.remove('expanded');
+            document.getElementById('username').value = '';
+            document.getElementById('accessKey').value = '';
+            document.getElementById('advUsername').value = '';
+            document.getElementById('advKey').value = '';
+            clearLoginMessage();
+            clearAdvMessage();
+            document.getElementById('docListInner').innerHTML = '';
+            document.getElementById('docDetailContent').innerHTML = '';
+            currentDocId = null;
+        }
+
+        // ==================== 文档渲染 ====================
+        function renderDocList() {
+            const container = document.getElementById('docListInner');
+            if (!allDocuments.length) {
+                container.innerHTML =
+                    '<p style="text-align:center;color:var(--text-secondary);padding:30px;">暂无档案数据。</p>';
+                return;
+            }
+            let html = '';
+            allDocuments.forEach(doc => {
+                let classificationClass = 'classification-internal';
+                let classificationLabel = '内部';
+                if (doc.classification === 'top-secret') {
+                    classificationClass = 'classification-top-secret';
+                    classificationLabel = '绝密';
+                } else if (doc.classification === 'confidential') {
+                    classificationClass = 'classification-confidential';
+                    classificationLabel = '机密';
+                }
+                html += `
+                <div class="doc-card" onclick="openDocument('${doc.id}')">
+                    <span class="doc-title">${escapeHTML(doc.title)}</span>
+                    <span class="doc-meta">${escapeHTML(doc.date)} · ${escapeHTML(doc.author)} · ${escapeHTML(doc.category)}</span>
+                    <span class="doc-classification ${classificationClass}">${classificationLabel}</span>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function openDocument(docId) {
+            const doc = allDocuments.find(d => d.id === docId);
+            if (!doc) return;
+            currentDocId = docId;
+            document.getElementById('docListView').classList.remove('visible');
+            const detailView = document.getElementById('docDetailView');
+            detailView.classList.add('visible');
+            const content = document.getElementById('docDetailContent');
+            let classificationLabel = '内部';
+            if (doc.classification === 'top-secret') classificationLabel = '【绝密】';
+            else if (doc.classification === 'confidential') classificationLabel = '【机密】';
+            content.innerHTML = `
+                <h3 style="color:var(--accent-gold);letter-spacing:2px;margin-bottom:4px;font-family:var(--font-serif);">${escapeHTML(doc.title)}</h3>
+                <p style="font-size:0.7em;color:var(--text-secondary);margin-bottom:16px;font-family:var(--font-mono);letter-spacing:1px;">
+                    ${classificationLabel} · ${escapeHTML(doc.date)} · ${escapeHTML(doc.author)} · 分类：${escapeHTML(doc.category)}
+                </p>
+                <hr style="border-color:var(--border-subtle);margin-bottom:16px;">
+                <div style="white-space:pre-wrap;line-height:1.9;">${escapeHTML(doc.content)}</div>
+            `;
+        }
+
+        function backToDocList() {
+            document.getElementById('docDetailView').classList.remove('visible');
+            document.getElementById('docListView').classList.add('visible');
+            currentDocId = null;
+        }
+
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ==================== 模态框 ====================
+        function openProtocolModal() {
+            document.getElementById('protocolModal').classList.remove('hidden');
+            document.getElementById('advUsername').value = '';
+            document.getElementById('advKey').value = '';
+            clearAdvMessage();
+            // 如果已登录普通账号，预填用户名
+            if (currentUser && currentUser.level === 'basic') {
+                document.getElementById('advUsername').value = currentUser.username;
+            }
+            setTimeout(() => {
+                document.getElementById('advUsername').focus();
+            }, 200);
+        }
+
+        function closeProtocolModal() {
+            document.getElementById('protocolModal').classList.add('hidden');
+            clearAdvMessage();
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('protocolModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProtocolModal();
+            }
+        });
+
+        // 键盘事件
+        document.addEventListener('keydown', function(e) {
+            // ESC关闭模态框
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('protocolModal');
+                if (!modal.classList.contains('hidden')) {
+                    closeProtocolModal();
+                }
+            }
+            // Enter键提交
+            if (e.key === 'Enter') {
+                const modal = document.getElementById('protocolModal');
+                if (!modal.classList.contains('hidden')) {
+                    handleAdvancedLogin();
+                } else if (document.getElementById('loginForm').style.display !== 'none') {
+                    handleLogin();
+                }
+            }
+        });
+
+        // ==================== 初始化 ====================
+        async function init() {
+            await loadJSONFiles();
+
+            // 检查sessionStorage中是否有已登录用户
+            const savedUser = sessionStorage.getItem('kts_user');
+            if (savedUser) {
+                try {
+                    const parsed = JSON.parse(savedUser);
+                    // 在账号列表中验证该用户是否仍然有效
+                    const account = findAccount(parsed.username,
+                        ''); // 无法获取完整密钥，用宽松验证
+                    const fullAccount = allAccounts.find(
+                        acc => acc.username.toLowerCase() === parsed.username.toLowerCase() &&
+                            acc.level === parsed.level
+                    );
+                    if (fullAccount) {
+                        currentUser = {
+                            username: fullAccount.username,
+                            level: fullAccount.level,
+                            name: fullAccount.name || fullAccount.username
+                        };
+                        updateUIForLoggedInUser();
+                        return;
+                    }
+                } catch (e) {
+                    sessionStorage.removeItem('kts_user');
+                }
+            }
+
+            // 默认显示登录界面
+            document.getElementById('loginForm').style.display = 'block';
+        }
+
+        // 启动
+        init();
+
+        console.log(`
+        ╔══════════════════════════════════════╗
+        ║   Kata Tim System - 内部研究档案    ║
+        ║   灵魂数字化项目 · 道法科技融合     ║
+        ║   GitHub部署版本 v2.1              ║
+        ╚══════════════════════════════════════╝
+        提示：在控制台输入以下内容查看演示账号（仅供测试）：
+        > console.log('普通账号: researcher_01 / K9X2-M7BQ-W4V8');
+        > console.log('高级账号: admin_sys / 003-5KUG-KB2Z-5XNF-3DJS');
+        `);
     </script>
 </body>
 </html>
