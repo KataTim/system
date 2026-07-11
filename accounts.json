@@ -1,17 +1,28 @@
-[
-  {
-    "username": "researcher_wang",
-    "key": "A1B2-C3D4-E5F6",
-    "isSpy": false
-  },
-  {
-    "username": "admin_tao",
-    "key": "003-5KUG-KB2Z-5XNF-3DJS",
-    "isSpy": true
-  },
-  {
-    "username": "observer_li",
-    "key": "G7H8-J9K0-L1M2",
-    "isSpy": false
-  }
-]
+{
+  "accounts": [
+    {
+      "username": "admin",
+      "key": "003-5KUG-KB2Z-5XNF-3DJS",
+      "level": "advanced",
+      "name": "系统管理员"
+    },
+    {
+      "username": "researcher_01",
+      "key": "A8X3-PL2M-Q7RN",
+      "level": "basic",
+      "name": "研究员 甲"
+    },
+    {
+      "username": "researcher_02",
+      "key": "B5K9-DR6H-W2ST",
+      "level": "basic",
+      "name": "研究员 乙"
+    },
+    {
+      "username": "observer_03",
+      "key": "C7M1-FG4J-V8XP",
+      "level": "basic",
+      "name": "观察员 丙"
+    }
+  ]
+}
