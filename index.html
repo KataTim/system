@@ -772,16 +772,16 @@
 
         // ==================== 工具函数 ====================
         function showLoginMessage(msg, type) {
-            const el = document.getElementById('loginMessage');
-            el.textContent = msg;
-            el.className = 'message ' + type;
-        }
+    const el = document.getElementById('loginMessage');
+    el.innerHTML = msg;  // 改为 innerHTML
+    el.className = 'message ' + type;
+}
 
-        function showAdvMessage(msg, type) {
-            const el = document.getElementById('advMessage');
-            el.textContent = msg;
-            el.className = 'message ' + type;
-        }
+function showAdvMessage(msg, type) {
+    const el = document.getElementById('advMessage');
+    el.innerHTML = msg;  // 改为 innerHTML
+    el.className = 'message ' + type;
+}
 
         function clearLoginMessage() {
             const el = document.getElementById('loginMessage');
