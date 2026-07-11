@@ -1,0 +1,17 @@
+[
+  {
+    "username": "researcher_wang",
+    "key": "A1B2-C3D4-E5F6",
+    "isSpy": false
+  },
+  {
+    "username": "admin_tao",
+    "key": "003-5KUG-KB2Z-5XNF-3DJS",
+    "isSpy": true
+  },
+  {
+    "username": "observer_li",
+    "key": "G7H8-J9K0-L1M2",
+    "isSpy": false
+  }
+]
