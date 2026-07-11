@@ -1,28 +1,34 @@
 {
-  "accounts": [
+  "users": [
+    {
+      "username": "researcher_01",
+      "name": "研究员 陈",
+      "key": "K9X2-M7BQ-W4V8",
+      "level": "basic"
+    },
+    {
+      "username": "researcher_02",
+      "name": "研究员 林",
+      "key": "N5H2-G9TE-R1A6",
+      "level": "basic"
+    },
+    {
+      "username": "observer_03",
+      "name": "观察员 张",
+      "key": "X3P7-Y8LM-Q2C5",
+      "level": "basic"
+    },
     {
       "username": "drcoder",
+      "name": "科德博士",
       "key": "003-5KUG-KB2Z-5XNF-3DJS",
-      "level": "advanced",
-      "name": "DRCODER"
+      "level": "advanced"
     },
     {
-      "username": "li_ming",
-      "key": "XK7B-NQ2R-8FWP",
-      "level": "basic",
-      "name": "李明"
-    },
-    {
-      "username": "chen_fang",
-      "key": "YH3M-VP8K-4DQS",
-      "level": "basic",
-      "name": "陈芳"
-    },
-    {
-      "username": "guest",
-      "key": "GUES-TACC-ESSK",
-      "level": "basic",
-      "name": "访客"
+      "username": "xingzawa",
+      "name": "星泽瓦",
+      "key": "007-J8H2-FV4M-6KY1-9LQ3",
+      "level": "advanced"
     }
   ]
 }
