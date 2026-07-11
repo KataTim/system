@@ -3,708 +3,1138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kata Tim System - 内部文档系统</title>
+    <title>Kata Tim System — 内部系统</title>
     <style>
         :root {
-            --bg-deep: #0a0a0f;
-            --bg-panel: #111118;
-            --bg-card: #16161f;
-            --text-primary: #c8c8d4;
-            --text-secondary: #8a8a9a;
-            --text-muted: #5a5a6a;
-            --accent: #7a6a4a;
-            --accent-glow: #b8a070;
-            --danger: #8b3a3a;
-            --danger-glow: #c44a4a;
-            --gold: #bfa060;
-            --border: #1e1e2a;
-            --border-active: #3a3a4a;
-            --input-bg: #0d0d15;
-            --overlay-bg: rgba(0,0,0,0.85);
-            --font-mono: 'Courier New', 'Source Code Pro', 'Consolas', monospace;
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --surface2: #181825;
+            --gold: #b8944b;
+            --gold-dim: #7a5f2e;
+            --red: #8b1a1a;
+            --red-bright: #c0392b;
+            --text: #c8c0b8;
+            --text-dim: #7a7268;
+            --text-bright: #e8e0d8;
+            --border: #2a2520;
+            --accent: #d4a853;
+            --error: #c0392b;
+            --success: #4a7a3a;
+            --font-mono: 'Courier New', 'Source Code Pro', 'Noto Sans Mono', monospace;
             --font-sans: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
-            --font-serif: 'Noto Serif SC', 'SimSun', 'STSong', 'Songti SC', serif;
-            --transition-fast: 0.15s ease;
-            --transition-normal: 0.3s ease;
-            --shadow-card: 0 4px 24px rgba(0,0,0,0.5);
-            --shadow-glow: 0 0 40px rgba(180,140,80,0.15);
+            --font-serif: 'Noto Serif SC', 'STSong', 'SimSun', 'Songti SC', serif;
+            --glow-gold: 0 0 20px rgba(184, 148, 75, 0.3);
+            --glow-red: 0 0 20px rgba(139, 26, 26, 0.4);
         }
 
         * {
-            margin:0; padding:0; box-sizing:border-box;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
+            background: var(--bg);
+            color: var(--text);
             font-family: var(--font-sans);
-            background: var(--bg-deep);
-            color: var(--text-primary);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image:
+                radial-gradient(ellipse at 50% 0%, rgba(184, 148, 75, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 85% 100%, rgba(139, 26, 26, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 15% 80%, rgba(184, 148, 75, 0.03) 0%, transparent 50%);
+            background-attachment: fixed;
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 粒子背景 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            font-size: 12px;
+            color: rgba(184, 148, 75, 0.15);
+            animation: floatUp linear infinite;
+            user-select: none;
+        }
+        @keyframes floatUp {
+            0% {
+                transform: translateY(105vh) rotate(0deg);
+                opacity: 0;
+            }
+            5% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        /* 主容器 */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 520px;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+        .main-container.expanded {
+            max-width: 900px;
+        }
+
+        /* 卡片 */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 36px 32px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), var(--glow-gold);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-dim), var(--accent), var(--gold-dim), transparent);
+            opacity: 0.7;
+        }
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(184, 148, 75, 0.3), transparent);
+        }
+
+        /* 太极装饰 */
+        .taiji-decor {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 8px;
+            opacity: 0.6;
+            letter-spacing: 6px;
+            user-select: none;
+            filter: grayscale(30%);
+        }
+
+        /* 标题 */
+        .system-title {
+            text-align: center;
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 3px;
+            margin-bottom: 4px;
+            user-select: none;
+        }
+        .system-subtitle {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 4px;
+            margin-bottom: 28px;
+            user-select: none;
+            font-family: var(--font-mono);
+        }
+
+        /* 分割线 */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 20px 0;
+            position: relative;
+        }
+        .divider::after {
+            content: '◆';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            padding: 0 10px;
+            color: var(--gold-dim);
+            font-size: 8px;
+        }
+
+        /* 输入组 */
+        .input-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-bright);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .input-group input:focus {
+            border-color: var(--gold-dim);
+            box-shadow: 0 0 12px rgba(184, 148, 75, 0.15);
+        }
+        .input-group input::placeholder {
+            color: #3a3530;
+            letter-spacing: 1px;
+            font-size: 12px;
+        }
+
+        /* 高级密钥输入区域 */
+        .advanced-key-section {
+            display: none;
+            border: 1px dashed #3a3020;
+            border-radius: 6px;
+            padding: 18px 16px;
+            margin-bottom: 16px;
+            background: rgba(139, 26, 26, 0.04);
+            animation: fadeSlideIn 0.5s ease;
+            position: relative;
+        }
+        .advanced-key-section.visible {
+            display: block;
+        }
+        .advanced-key-section .badge {
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: var(--red);
+            color: #f0d0d0;
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 3px;
+            letter-spacing: 2px;
+            font-family: var(--font-mono);
+            animation: pulseBadge 2s ease-in-out infinite;
+        }
+        @keyframes pulseBadge {
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(139, 26, 26, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(200, 50, 50, 0.8);
+            }
+        }
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 200px;
+            }
+        }
+        .advanced-key-section label {
+            color: #c08080;
+            font-size: 11px;
+            letter-spacing: 2px;
+            font-family: var(--font-mono);
+            display: block;
+            margin-bottom: 6px;
+        }
+        .advanced-key-section input {
+            width: 100%;
+            padding: 12px 14px;
+            background: #1a1015;
+            border: 1px solid #3a2025;
+            border-radius: 4px;
+            color: #e8c0c0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            letter-spacing: 1px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .advanced-key-section input:focus {
+            border-color: #8b1a1a;
+            box-shadow: 0 0 14px rgba(139, 26, 26, 0.3);
+        }
+        .advanced-key-section input::placeholder {
+            color: #3a2025;
+        }
+
+        /* 按钮 */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 13px;
+            background: var(--gold-dim);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            color: #0a0a0f;
+            font-family: var(--font-serif);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background: var(--accent);
+            box-shadow: var(--glow-gold);
+            transform: translateY(-1px);
+        }
+        .btn:active {
+            transform: scale(0.98);
+            transition: transform 0.1s ease;
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-family: var(--font-sans);
+            letter-spacing: 1px;
+            font-size: 13px;
+            font-weight: 400;
+            margin-top: 10px;
+        }
+        .btn-secondary:hover {
+            border-color: var(--text-dim);
+            color: var(--text-bright);
+            box-shadow: none;
+        }
+        .btn-danger {
+            background: var(--red);
+            border-color: #a02020;
+            color: #f0d0d0;
+            letter-spacing: 2px;
+            font-family: var(--font-sans);
+            font-weight: 500;
+        }
+        .btn-danger:hover {
+            background: #a02020;
+            box-shadow: var(--glow-red);
+            color: #fff;
+        }
+
+        /* "内部"点击区域 */
+        .inner-trigger {
+            text-align: center;
+            margin-top: 12px;
             user-select: none;
             cursor: default;
         }
-
-        #particlesCanvas {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            pointer-events: none; z-index:0; opacity:0.5;
-        }
-
-        .wallpaper-layer {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            z-index:1; pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3Cg opacity='0.18'%3E%3Ccircle cx='45' cy='40' r='3.5' fill='%23c8b0a0'/%3E%3Cpath d='M45 36 Q48 30 45 24 Q42 30 45 36Z' fill='%23c8b0a0' opacity='0.7'/%3E%3Cpath d='M45 36 Q52 33 54 26 Q48 31 45 36Z' fill='%23c8b0a0' opacity='0.7'/%3E%3Cpath d='M45 36 Q52 40 56 36 Q49 38 45 36Z' fill='%23c8b0a0' opacity='0.7'/%3E%3Cpath d='M45 36 Q46 43 43 48 Q44 40 45 36Z' fill='%23c8b0a0' opacity='0.7'/%3E%3Cpath d='M45 36 Q38 40 34 36 Q41 38 45 36Z' fill='%23c8b0a0' opacity='0.7'/%3E%3Cpath d='M45 36 Q38 31 36 24 Q42 31 45 36Z' fill='%23c8b0a0' opacity='0.7'/%3E%3C/g%3E%3C/svg%3E");
-            background-repeat: repeat;
-            background-size: 90px 90px;
-        }
-
-        .main-container {
-            position: relative; z-index:10;
-            display: flex; align-items:center; justify-content:center;
-            min-height: 100vh; padding:20px;
-        }
-
-        .login-panel {
-            background: var(--bg-panel);
-            border:1px solid var(--border);
-            border-radius:12px; padding:40px 36px;
-            width:100%; max-width:420px;
-            box-shadow: var(--shadow-card), var(--shadow-glow);
-            position: relative; overflow:hidden;
-        }
-        .login-panel::before {
-            content:''; position:absolute; top:-1px; left:20px; right:20px; height:1px;
-            background: linear-gradient(90deg, transparent, rgba(180,150,110,0.4), transparent);
-        }
-        .login-panel .logo-area { text-align:center; margin-bottom:28px; }
-        .login-panel .logo-icon {
-            width:56px; height:56px; margin:0 auto 12px;
-            border-radius:50%; border:2px solid var(--accent);
-            display:flex; align-items:center; justify-content:center;
-            background: radial-gradient(circle at 40% 35%, rgba(180,150,110,0.25) 0%, transparent 60%);
-        }
-        .login-panel .logo-icon svg {
-            width:28px; height:28px; fill:none; stroke:var(--accent-glow); stroke-width:1.5;
-        }
-        .login-panel h1 {
-            font-family: var(--font-serif); font-size:1.35rem; font-weight:400;
-            letter-spacing:0.06em; color:var(--text-primary); margin:0 0 4px;
-        }
-        .login-panel .subtitle {
-            font-size:0.75rem; color:var(--text-muted);
-            letter-spacing:0.08em; text-transform:uppercase;
-        }
-        /* “内部”可点击样式 */
-        .trigger-word {
-            color: var(--accent-glow);
-            font-weight: 500;
-            cursor: pointer;
-            transition: color 0.2s;
+        .inner-trigger span {
             display: inline-block;
+            font-size: 10px;
+            color: #1a1815;
+            letter-spacing: 2px;
+            padding: 4px 12px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-family: var(--font-mono);
         }
-        .trigger-word:hover {
-            color: #e0c8a0;
-            text-shadow: 0 0 6px rgba(180,150,100,0.4);
+        .inner-trigger span:hover {
+            color: #3a3530;
+            background: rgba(255, 255, 255, 0.02);
         }
-
-        .login-panel .form-group { margin-bottom:18px; }
-        .login-panel label {
-            display:block; font-size:0.7rem; letter-spacing:0.06em;
-            color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase;
-        }
-        .login-panel input[type="text"],
-        .login-panel input[type="password"] {
-            width:100%; padding:11px 14px;
-            background: var(--input-bg); border:1px solid var(--border);
-            border-radius:6px; color:var(--text-primary);
-            font-family: var(--font-mono); font-size:0.9rem;
-            letter-spacing:0.04em; transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-            outline:none;
-        }
-        .login-panel input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(160,130,90,0.1);
-        }
-        .btn-login {
-            width:100%; padding:12px;
-            background: linear-gradient(135deg, #3a3028 0%, #4a3d30 100%);
-            border:1px solid var(--accent); border-radius:6px;
-            color:#d4c8b0; font-family: var(--font-sans);
-            font-size:0.9rem; letter-spacing:0.06em; cursor:pointer;
-            transition: all var(--transition-normal); text-transform:uppercase;
-        }
-        .btn-login:hover {
-            background: linear-gradient(135deg, #4a3d30 0%, #5a4d3d 100%);
-            box-shadow: 0 0 20px rgba(180,140,80,0.2);
-            border-color:#b8a070;
-        }
-        .btn-login:active { transform: scale(0.98); transition: transform 0.1s ease; }
-        .hint-text {
-            text-align:center; margin-top:16px;
-            font-size:0.68rem; color:var(--text-muted);
-            letter-spacing:0.04em; line-height:1.5;
-        }
-        .hint-text .dot {
-            display:inline-block; width:5px; height:5px;
-            border-radius:50%; background:var(--text-muted);
-            margin:0 6px; vertical-align:middle;
-            animation: dotBlink 3s ease-in-out infinite;
-        }
-        @keyframes dotBlink {
-            0%,100%{ opacity:0.3; } 50%{ opacity:1; }
+        .inner-trigger span.flash {
+            color: var(--accent);
+            text-shadow: 0 0 8px rgba(184, 148, 75, 0.6);
+            transition: all 0.05s ease;
         }
 
-        /* Toast */
-        .message-toast {
-            position:fixed; top:20px; left:50%; transform:translateX(-50%);
-            z-index:1000; padding:14px 22px; border-radius:8px;
-            font-size:0.85rem; letter-spacing:0.03em;
-            max-width:500px; text-align:center;
-            animation: slideDown 0.4s ease;
-            box-shadow:0 8px 32px rgba(0,0,0,0.6);
+        /* 提示消息 */
+        .message {
+            display: none;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-top: 14px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-align: center;
+            animation: fadeSlideIn 0.3s ease;
         }
-        .message-toast.error { background:#1a0d0d; border:1px solid var(--danger); color:#e0b0b0; }
-        .message-toast.success { background:#0d1a0d; border:1px solid #3a5a3a; color:#b0d0b0; }
-        .message-toast.info { background:#0d0d1a; border:1px solid #3a3a5a; color:#b0b0d0; }
-        .mail-btn {
-            display:inline-block; margin-top:8px; padding:8px 16px;
-            background:#1a1010; border:1px solid #c44a4a; border-radius:4px;
-            color:#e0a0a0; cursor:pointer; text-decoration:none;
-            font-size:0.8rem; letter-spacing:0.04em; transition:all 0.2s ease;
+        .message.error {
+            display: block;
+            background: rgba(139, 26, 26, 0.2);
+            border: 1px solid #3a1515;
+            color: #d08080;
         }
-        .mail-btn:hover {
-            background:#2a1515; border-color:#e06060; color:#ffc0c0;
-            box-shadow:0 0 12px rgba(200,60,60,0.3);
+        .message.success {
+            display: block;
+            background: rgba(74, 122, 58, 0.2);
+            border: 1px solid #2a3a20;
+            color: #80b870;
         }
-        @keyframes slideDown {
-            from{ opacity:0; transform:translateX(-50%) translateY(-30px); }
-            to{ opacity:1; transform:translateX(-50%) translateY(0); }
-        }
-
-        /* 模态框 */
-        .modal-overlay {
-            position:fixed; top:0; left:0; width:100%; height:100%;
-            z-index:900; background:var(--overlay-bg);
-            display:flex; align-items:center; justify-content:center;
-            animation:fadeIn 0.3s ease;
-        }
-        .modal-overlay.hidden { display:none; }
-        .modal-dialog {
-            background:#0f0f18; border:2px solid #2a1a10;
-            border-radius:14px; padding:32px 28px;
-            width:90%; max-width:400px;
-            box-shadow:0 0 60px rgba(180,100,40,0.2), 0 20px 60px rgba(0,0,0,0.7);
-            position:relative;
-            animation:modalIn 0.4s cubic-bezier(0.22,0.61,0.36,1);
-        }
-        .modal-dialog::before {
-            content:''; position:absolute; inset:-2px; border-radius:15px; padding:2px;
-            background:linear-gradient(135deg, rgba(180,130,70,0.5), transparent 40%, transparent 60%, rgba(180,130,70,0.5));
-            -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none;
-        }
-        .modal-dialog h3 {
-            font-family:var(--font-serif); font-size:1.1rem; letter-spacing:0.06em;
-            color:#d4b896; text-align:center; margin-bottom:6px; font-weight:400;
-        }
-        .modal-dialog .modal-subtitle {
-            text-align:center; font-size:0.7rem; color:#8a6a4a;
-            letter-spacing:0.05em; margin-bottom:20px;
-        }
-        .modal-dialog input {
-            width:100%; padding:11px 14px; background:#0a0a12;
-            border:1px solid #2a1a10; border-radius:6px; color:#d4b896;
-            font-family:var(--font-mono); font-size:0.9rem; letter-spacing:0.05em;
-            outline:none; transition:all var(--transition-fast);
-        }
-        .modal-dialog input:focus {
-            border-color:#8a5a30; box-shadow:0 0 12px rgba(180,100,40,0.2);
-        }
-        .modal-dialog .btn-submit {
-            width:100%; padding:11px; margin-top:14px;
-            background:linear-gradient(135deg, #1a0f08 0%, #2a1a10 100%);
-            border:1px solid #5a3a20; border-radius:6px; color:#d4b896;
-            cursor:pointer; font-family:var(--font-sans);
-            letter-spacing:0.06em; font-size:0.85rem; transition:all var(--transition-normal);
-        }
-        .modal-dialog .btn-submit:hover {
-            border-color:#b87030; box-shadow:0 0 20px rgba(180,100,40,0.25);
-        }
-        .modal-dialog .btn-close {
-            position:absolute; top:12px; right:16px; width:30px; height:30px;
-            background:transparent; border:1px solid transparent; border-radius:50%;
-            color:#6a5a4a; cursor:pointer; font-size:1rem;
-            display:flex; align-items:center; justify-content:center; transition:all var(--transition-fast);
-        }
-        .modal-dialog .btn-close:hover { border-color:#5a3a20; color:#c8a080; }
-        @keyframes fadeIn { from{ opacity:0; } to{ opacity:1; } }
-        @keyframes modalIn {
-            from{ opacity:0; transform:scale(0.9) translateY(-20px); }
-            to{ opacity:1; transform:scale(1) translateY(0); }
+        .message.info {
+            display: block;
+            background: rgba(184, 148, 75, 0.1);
+            border: 1px solid #2a2520;
+            color: #c8b080;
         }
 
-        /* 文档页面 */
-        .docs-container {
-            position:relative; z-index:10; display:flex;
-            min-height:100vh; max-width:1200px; margin:0 auto;
-            padding:20px; gap:20px;
+        /* 邮件按钮 */
+        .mail-link {
+            display: inline-block;
+            color: #c08080;
+            text-decoration: underline;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 1px;
+            transition: color 0.2s;
         }
-        .docs-sidebar {
-            width:260px; flex-shrink:0; background:var(--bg-panel);
-            border:1px solid var(--border); border-radius:10px;
-            padding:20px 16px; box-shadow:var(--shadow-card);
-            overflow-y:auto; max-height:calc(100vh - 40px);
-            position:sticky; top:20px;
+        .mail-link:hover {
+            color: #e0a0a0;
         }
-        .docs-sidebar h3 {
-            font-family:var(--font-serif); font-size:1rem; letter-spacing:0.05em;
-            color:var(--accent-glow); margin-bottom:16px; padding-bottom:10px;
-            border-bottom:1px solid var(--border); font-weight:400;
+
+        /* 文档浏览器 */
+        .doc-browser {
+            display: none;
+            animation: fadeSlideIn 0.5s ease;
+        }
+        .doc-browser.active {
+            display: block;
+        }
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .doc-header .user-info {
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 1px;
+            font-family: var(--font-mono);
+        }
+        .doc-header .user-info .level-badge {
+            display: inline-block;
+            background: var(--red);
+            color: #f0d0d0;
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 2px;
+            margin-left: 6px;
+            letter-spacing: 2px;
+            vertical-align: middle;
+        }
+        .doc-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        .doc-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .doc-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .doc-list::-webkit-scrollbar-thumb {
+            background: #2a2520;
+            border-radius: 2px;
         }
         .doc-list-item {
-            display:block; width:100%; padding:10px 12px; margin-bottom:4px;
-            background:transparent; border:1px solid transparent; border-radius:6px;
-            color:var(--text-secondary); cursor:pointer; text-align:left;
-            font-size:0.8rem; letter-spacing:0.03em; transition:all var(--transition-fast);
-            font-family:var(--font-sans);
+            padding: 14px 16px;
+            border: 1px solid transparent;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border-radius: 3px;
+            position: relative;
         }
-        .doc-list-item:hover { background:rgba(255,255,255,0.02); border-color:var(--border-active); color:var(--text-primary); }
-        .doc-list-item.active { background:rgba(180,150,110,0.08); border-color:var(--accent); color:var(--accent-glow); }
-        .badge {
-            display:inline-block; font-size:0.6rem; padding:2px 7px; border-radius:3px;
-            margin-left:6px; letter-spacing:0.05em; vertical-align:middle;
+        .doc-list-item:hover {
+            background: var(--surface2);
+            border-color: #2a2520;
         }
-        .badge-report { background:rgba(200,60,60,0.2); color:#e08080; border:1px solid rgba(200,60,60,0.3); }
-        .badge-log { background:rgba(100,140,180,0.2); color:#90b8d8; border:1px solid rgba(100,140,180,0.3); }
-        .badge-protocol { background:rgba(140,160,100,0.2); color:#a8c090; border:1px solid rgba(140,160,100,0.3); }
-        .docs-content {
-            flex:1; background:var(--bg-panel); border:1px solid var(--border);
-            border-radius:10px; padding:30px 28px; box-shadow:var(--shadow-card);
-            overflow-y:auto; max-height:calc(100vh - 40px);
+        .doc-list-item .doc-title {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            color: var(--text-bright);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
         }
-        .doc-header { margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border); }
-        .doc-title { font-family:var(--font-serif); font-size:1.4rem; font-weight:400; letter-spacing:0.04em; color:var(--text-primary); margin-bottom:6px; }
-        .doc-meta { font-size:0.7rem; color:var(--text-muted); letter-spacing:0.04em; }
-        .doc-body {
-            font-family:var(--font-serif); font-size:0.9rem; line-height:1.8;
-            color:var(--text-secondary); letter-spacing:0.02em; white-space:pre-wrap;
+        .doc-list-item .doc-meta {
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            font-family: var(--font-mono);
         }
-        .redacted { background:#1a1a1a; color:#1a1a1a; padding:1px 8px; border-radius:2px; user-select:none; cursor:default; letter-spacing:0; }
-        .highlight { color:#d4b896; font-weight:500; }
-        .no-access { text-align:center; padding:60px 20px; color:var(--text-muted); }
-        .no-access .lock-icon { font-size:3rem; margin-bottom:16px; opacity:0.5; }
-        .no-access p { font-size:0.85rem; letter-spacing:0.04em; }
-        .btn-logout {
-            display:inline-block; margin-top:16px; padding:8px 20px;
-            background:transparent; border:1px solid var(--border-active); border-radius:6px;
-            color:var(--text-secondary); cursor:pointer; font-size:0.75rem; letter-spacing:0.05em;
-            transition:all var(--transition-fast);
+        .doc-list-item .doc-category {
+            display: inline-block;
+            font-size: 9px;
+            padding: 2px 7px;
+            border-radius: 2px;
+            margin-left: 8px;
+            letter-spacing: 1px;
+            font-family: var(--font-mono);
+            background: rgba(184, 148, 75, 0.15);
+            color: #b8944b;
+            border: 1px solid rgba(184, 148, 75, 0.25);
         }
-        .btn-logout:hover { border-color:var(--danger); color:#e0a0a0; background:rgba(200,60,60,0.05); }
-        .top-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-        .user-info { font-size:0.75rem; color:var(--text-muted); letter-spacing:0.04em; }
-        .user-info span { color:var(--accent-glow); }
+        .doc-list-item .doc-category.accident {
+            background: rgba(139, 26, 26, 0.2);
+            color: #c08080;
+            border-color: rgba(139, 26, 26, 0.3);
+        }
 
-        @media (max-width:768px) {
-            .docs-container { flex-direction:column; padding:10px; gap:10px; }
-            .docs-sidebar { width:100%; max-height:200px; position:static; padding:14px 12px; }
-            .docs-content { max-height:none; padding:20px 16px; }
-            .login-panel { padding:28px 20px; max-width:95%; }
+        /* 文档详情 */
+        .doc-detail {
+            display: none;
+            animation: fadeSlideIn 0.4s ease;
         }
-        ::-webkit-scrollbar { width:5px; }
-        ::-webkit-scrollbar-track { background:transparent; }
-        ::-webkit-scrollbar-thumb { background:#2a2a35; border-radius:3px; }
-        ::-webkit-scrollbar-thumb:hover { background:#3a3a45; }
-        .docs-content .doc-body { user-select:text; -webkit-user-select:text; cursor:text; }
+        .doc-detail.active {
+            display: block;
+        }
+        .doc-detail .back-btn {
+            display: inline-block;
+            cursor: pointer;
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+            transition: color 0.2s;
+            user-select: none;
+        }
+        .doc-detail .back-btn:hover {
+            color: #d4b873;
+        }
+        .doc-detail .detail-title {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .doc-detail .detail-meta {
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            font-family: var(--font-mono);
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .doc-detail .detail-content {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.9;
+            color: var(--text);
+            letter-spacing: 0.5px;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        .doc-detail .detail-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .doc-detail .detail-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .doc-detail .detail-content::-webkit-scrollbar-thumb {
+            background: #2a2520;
+            border-radius: 2px;
+        }
+
+        /* 无权限页面 */
+        .no-access {
+            display: none;
+            text-align: center;
+            padding: 30px 0;
+            animation: fadeSlideIn 0.5s ease;
+        }
+        .no-access.active {
+            display: block;
+        }
+        .no-access .lock-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            user-select: none;
+        }
+        .no-access h3 {
+            font-family: var(--font-serif);
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            font-weight: 400;
+        }
+        .no-access p {
+            font-size: 12px;
+            color: #5a5040;
+            letter-spacing: 1px;
+            margin-top: 8px;
+            font-family: var(--font-mono);
+        }
+
+        /* 响应式 */
+        @media (max-width: 600px) {
+            .card {
+                padding: 24px 16px;
+                border-radius: 4px;
+            }
+            .system-title {
+                font-size: 18px;
+                letter-spacing: 2px;
+            }
+            .system-subtitle {
+                font-size: 10px;
+                letter-spacing: 3px;
+            }
+            .input-group input {
+                font-size: 13px;
+                padding: 10px 12px;
+            }
+            .btn {
+                font-size: 13px;
+                padding: 11px;
+                letter-spacing: 2px;
+            }
+            .doc-detail .detail-title {
+                font-size: 17px;
+            }
+            .doc-detail .detail-content {
+                font-size: 13px;
+                max-height: 350px;
+            }
+            .doc-list {
+                max-height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <canvas id="particlesCanvas"></canvas>
-    <div class="wallpaper-layer"></div>
+    <!-- 粒子背景 -->
+    <div class="particles" id="particles"></div>
 
-    <!-- 主界面 -->
+    <!-- 主容器 -->
     <div class="main-container" id="mainContainer">
-        <div class="login-panel" id="loginPanel">
-            <div class="logo-area">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="8" r="3"/>
-                        <path d="M6 20 Q12 12 18 20"/>
-                        <line x1="12" y1="11" x2="12" y2="16"/>
-                    </svg>
+        <div class="card" id="mainCard">
+
+            <!-- 太极装饰 -->
+            <div class="taiji-decor">☯</div>
+
+            <!-- 标题 -->
+            <div class="system-title">Kata Tim System</div>
+            <div class="system-subtitle">· 内 部 系 统 ·</div>
+
+            <!-- ==================== 登录表单 ==================== -->
+            <div id="loginSection">
+                <div class="input-group">
+                    <label>用户名 / Username</label>
+                    <input type="text" id="usernameInput" placeholder="输入用户名" autocomplete="off">
                 </div>
-                <h1>Kata Tim System</h1>
-                <div class="subtitle">
-                    <span class="trigger-word" id="triggerInternal">内部</span>文档访问系统
+
+                <div class="input-group">
+                    <label>内部密钥 / Key（XXXX-XXXX-XXXX）</label>
+                    <input type="text" id="keyInput" placeholder="XXXX-XXXX-XXXX" autocomplete="off" maxlength="14">
+                </div>
+
+                <!-- 高级密钥区域（默认隐藏） -->
+                <div class="advanced-key-section" id="advancedKeySection">
+                    <span class="badge">▲ 高级</span>
+                    <label>高级密钥 / Advanced Key（5段）</label>
+                    <input type="text" id="advancedKeyInput" placeholder="XXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" maxlength="27">
+                </div>
+
+                <button class="btn" id="loginBtn">验 证 登 录</button>
+
+                <!-- 消息区域 -->
+                <div id="messageArea"></div>
+
+                <!-- "内部" 点击触发器 -->
+                <div class="inner-trigger">
+                    <span id="innerTrigger" title="">内 部</span>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="usernameInput">用户名 / Username</label>
-                <input type="text" id="usernameInput" placeholder="输入用户名..." autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label for="keyInput">内部密钥 / Internal Key</label>
-                <input type="password" id="keyInput" placeholder="XXXX-XXXX-XXXX" autocomplete="off">
-            </div>
-            <button class="btn-login" id="btnLogin">验证身份 · 登入系统</button>
-            <div class="hint-text">
-                <span class="dot"></span> 请使用分配的内部密钥登入
-                <br>如密钥无效，请联络系统管理员
-            </div>
-        </div>
-    </div>
 
-    <!-- 内鬼密钥模态框 -->
-    <div class="modal-overlay hidden" id="spyModalOverlay">
-        <div class="modal-dialog">
-            <button class="btn-close" id="btnCloseModal">✕</button>
-            <h3>🜁 特殊访问通道</h3>
-            <div class="modal-subtitle">请输入内鬼密钥以获取完整权限</div>
-            <input type="password" id="spyKeyInput" placeholder="内鬼密钥..." autocomplete="off">
-            <button class="btn-submit" id="btnSpySubmit">验证内鬼密钥</button>
-        </div>
-    </div>
-
-    <!-- 消息提示 -->
-    <div id="toastContainer"></div>
-
-    <!-- 文档页面 -->
-    <div class="docs-container hidden" id="docsContainer">
-        <div class="docs-sidebar">
-            <h3>📄 文档索引</h3>
-            <div id="docList"></div>
-        </div>
-        <div class="docs-content" id="docsContent">
-            <div class="no-access" id="noAccessMsg">
-                <div class="lock-icon">🔒</div>
-                <p>您的密钥权限不足，无法查看文档内容。</p>
-                <p style="font-size:0.7rem;color:#5a5a6a;">如需获取完整访问权限，请使用内鬼密钥。</p>
-                <button class="btn-logout" id="btnLogout1">退出登录</button>
-            </div>
-            <div id="docDetail" class="hidden">
+            <!-- ==================== 文档浏览器（高级用户） ==================== -->
+            <div class="doc-browser" id="docBrowser">
                 <div class="doc-header">
-                    <div class="doc-title" id="docTitle"></div>
-                    <div class="doc-meta" id="docMeta"></div>
+                    <span class="user-info">
+                        已登录：<strong id="displayUsername">—</strong>
+                        <span class="level-badge">高级权限</span>
+                    </span>
+                    <button class="btn btn-secondary" id="logoutBtn" style="width:auto;padding:8px 16px;font-size:11px;margin-top:0;">退出登录</button>
                 </div>
-                <div class="doc-body" id="docBody"></div>
-                <button class="btn-logout" style="margin-top:20px;" id="btnLogout2">退出登录</button>
+                <div id="docListView">
+                    <p style="font-family:var(--font-mono);font-size:11px;color:var(--text-dim);letter-spacing:2px;margin-bottom:14px;">
+                        📁 档案目录 — 共 <span id="docCount">0</span> 份文档
+                    </p>
+                    <ul class="doc-list" id="docList"></ul>
+                </div>
+                <div class="doc-detail" id="docDetail"></div>
+            </div>
+
+            <!-- ==================== 无权限页面（普通用户） ==================== -->
+            <div class="no-access" id="noAccessSection">
+                <div class="lock-icon">🔒</div>
+                <h3>访问受限</h3>
+                <p>您的密钥权限等级不足<br>无法查阅内部文档</p>
+                <p style="margin-top:16px;font-size:10px;color:#4a4030;">如需升级权限，请联系系统管理员</p>
+                <button class="btn btn-secondary" id="logoutBtn2" style="width:auto;padding:8px 20px;font-size:11px;margin-top:20px;">返回登录</button>
             </div>
         </div>
     </div>
 
     <script>
         (function() {
-            // 状态
-            const STATE = { accounts: [], documents: [], currentUser: null, isSpyUser: false, activeDocId: null };
+            // ==================== 粒子背景 ====================
+            const particlesContainer = document.getElementById('particles');
+            const taoistSymbols = ['☯', '☰', '☱', '☲', '☳', '☴', '☵', '☶', '☷', '·', '○', '◇', '△', '□'];
+            for (let i = 0; i < 35; i++) {
+                const particle = document.createElement('span');
+                particle.className = 'particle';
+                particle.textContent = taoistSymbols[Math.floor(Math.random() * taoistSymbols.length)];
+                particle.style.left = Math.random() * 95 + '%';
+                particle.style.fontSize = (8 + Math.random() * 16) + 'px';
+                particle.style.animationDuration = (15 + Math.random() * 40) + 's';
+                particle.style.animationDelay = Math.random() * 35 + 's';
+                particle.style.opacity = (0.06 + Math.random() * 0.14);
+                particlesContainer.appendChild(particle);
+            }
 
-            // DOM 元素
-            const $ = (sel) => document.querySelector(sel);
-            const loginPanel = $('#loginPanel');
-            const docsContainer = $('#docsContainer');
-            const spyModalOverlay = $('#spyModalOverlay');
-            const toastContainer = $('#toastContainer');
-            const docList = $('#docList');
-            const docsContent = $('#docsContent');
-            const docDetail = $('#docDetail');
-            const noAccessMsg = $('#noAccessMsg');
-            const docTitle = $('#docTitle');
-            const docMeta = $('#docMeta');
-            const docBody = $('#docBody');
-            const usernameInput = $('#usernameInput');
-            const keyInput = $('#keyInput');
-            const spyKeyInput = $('#spyKeyInput');
-            const btnLogin = $('#btnLogin');
-            const btnSpySubmit = $('#btnSpySubmit');
-            const btnCloseModal = $('#btnCloseModal');
-            const triggerInternal = $('#triggerInternal');
+            // ==================== DOM 元素 ====================
+            const loginSection = document.getElementById('loginSection');
+            const docBrowser = document.getElementById('docBrowser');
+            const noAccessSection = document.getElementById('noAccessSection');
+            const advancedKeySection = document.getElementById('advancedKeySection');
+            const messageArea = document.getElementById('messageArea');
+            const innerTrigger = document.getElementById('innerTrigger');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutBtn2 = document.getElementById('logoutBtn2');
+            const usernameInput = document.getElementById('usernameInput');
+            const keyInput = document.getElementById('keyInput');
+            const advancedKeyInput = document.getElementById('advancedKeyInput');
+            const mainContainer = document.getElementById('mainContainer');
+            const docListView = document.getElementById('docListView');
+            const docDetail = document.getElementById('docDetail');
+            const docList = document.getElementById('docList');
+            const docCountSpan = document.getElementById('docCount');
+            const displayUsername = document.getElementById('displayUsername');
 
-            // 点击计数（连续点击“内部”10次）
-            let internalClickCount = 0;
-            let internalClickTimer = null;
+            // ==================== 状态 ====================
+            let innerClickCount = 0;
+            let innerClickTimer = null;
+            let accountsData = [];
+            let documentsData = [];
+            let currentUser = null;
+            let isAdvancedUser = false;
 
-            // 加载JSON
+            // ==================== 加载JSON数据 ====================
             async function loadJSON(path) {
                 try {
-                    const resp = await fetch(path);
-                    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                    return await resp.json();
+                    const response = await fetch(path);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
                 } catch (err) {
                     console.error(`加载 ${path} 失败:`, err);
-                    showToast(`无法加载数据文件: ${path}。请确保通过服务器访问。`, 'error');
                     return null;
                 }
             }
 
             async function initData() {
-                const [accounts, documents] = await Promise.all([
-                    loadJSON('./accounts.json'),
-                    loadJSON('./documents.json')
-                ]);
-                if (accounts) STATE.accounts = accounts;
-                if (documents) STATE.documents = documents;
-            }
+                const accountsResult = await loadJSON('accounts.json');
+                const documentsResult = await loadJSON('documents.json');
 
-            // Toast
-            function showToast(message, type='info', duration=5000, extraHTML='') {
-                const toast = document.createElement('div');
-                toast.className = `message-toast ${type}`;
-                toast.innerHTML = message + extraHTML;
-                toastContainer.appendChild(toast);
-                if (duration > 0) {
-                    setTimeout(() => {
-                        if (toast.parentNode) {
-                            toast.style.opacity = '0';
-                            toast.style.transition = 'opacity 0.4s ease';
-                            setTimeout(() => toast.remove(), 400);
-                        }
-                    }, duration);
+                if (accountsResult && accountsResult.accounts) {
+                    accountsData = accountsResult.accounts;
+                } else {
+                    console.warn('accounts.json 加载失败，使用默认数据');
+                    accountsData = [
+                        { username: 'admin', key: '003-5KUG-KB2Z-5XNF-3DJS', level: 'advanced',
+                            name: '系统管理员' },
+                        { username: 'researcher_01', key: 'A8X3-PL2M-Q7RN', level: 'basic', name: '研究员 甲' },
+                        { username: 'researcher_02', key: 'B5K9-DR6H-W2ST', level: 'basic', name: '研究员 乙' },
+                        { username: 'observer_03', key: 'C7M1-FG4J-V8XP', level: 'basic', name: '观察员 丙' },
+                    ];
                 }
-                return toast;
-            }
-            function clearToasts() { toastContainer.innerHTML = ''; }
 
-            // 账号查找
-            function findAccount(username, key) {
-                return STATE.accounts.find(a => a.username.toLowerCase() === username.trim().toLowerCase() && a.key.toUpperCase() === key.trim().toUpperCase());
-            }
-            function findSpyAccount(key) {
-                return STATE.accounts.find(a => a.isSpy === true && a.key.toUpperCase() === key.trim().toUpperCase());
-            }
-            function isValidKeyFormat(key) {
-                return /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key.trim().toUpperCase()) || 
-                       /^[A-Z0-9]{3,4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key.trim().toUpperCase());
-            }
-
-            // 普通登录
-            function handleLogin() {
-                clearToasts();
-                const username = usernameInput.value.trim();
-                const key = keyInput.value.trim();
-                if (!username || !key) { showToast('请输入用户名和内部密钥。', 'error'); return; }
-                if (!isValidKeyFormat(key)) { showToast('密钥格式无效。', 'error'); return; }
-                const account = findAccount(username, key);
-                if (!account) {
-                    const mailto = `mailto:kata.tim.sys@gmail.com?subject=${encodeURIComponent('密钥验证失败')}&body=${encodeURIComponent('用户名: '+username+'\n密钥: '+key)}`;
-                    const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=kata.tim.sys@gmail.com&su=${encodeURIComponent('密钥验证失败')}&body=${encodeURIComponent('用户名: '+username+'\n密钥: '+key)}`;
-                    const extra = `<br><a class="mail-btn" href="${mailto}" target="_blank">📧 一键发送邮件</a> <a class="mail-btn" href="${gmail}" target="_blank">📬 Gmail快捷发送</a>`;
-                    showToast('⚠️ 密钥验证无效。请发送邮件至 kata.tim.sys@gmail.com 请求协助。', 'error', 8000, extra);
-                    return;
+                if (documentsResult && documentsResult.documents) {
+                    documentsData = documentsResult.documents;
+                } else {
+                    console.warn('documents.json 加载失败，使用默认数据');
+                    documentsData = getDefaultDocuments();
                 }
-                STATE.currentUser = account;
-                STATE.isSpyUser = account.isSpy === true;
-                STATE.activeDocId = null;
-                showToast(STATE.isSpyUser ? '✅ 内鬼密钥验证通过。完整文档权限已授予。' : '✅ 身份验证通过。但密钥权限有限，无法查看文档内容。', STATE.isSpyUser?'success':'info', 4000);
-                transitionToDocs();
             }
 
-            // 内鬼登录
-            function handleSpyLogin() {
-                clearToasts();
-                const key = spyKeyInput.value.trim();
-                if (!key) { showToast('请输入内鬼密钥。', 'error'); return; }
-                const account = findSpyAccount(key);
-                if (!account) {
-                    showToast('❌ 内鬼密钥无效。', 'error');
-                    return;
+            function getDefaultDocuments() {
+                return [
+                    {
+                        id: 'doc-001',
+                        title: '灵魂数字化转存实验报告 — 第7次尝试',
+                        date: '2024-03-15',
+                        category: '实验报告',
+                        classified: true,
+                        content: '【实验编号】KTS-EXP-007\n【实验日期】2024年3月15日 子时\n【实验地点】██省██市郊外道观地下密室\n【参与人员】道术师-玄明子、技术支持-研究员甲、观察员-丙\n\n【实验目的】\n验证通过改良版"引魂渡虚"法术，将自愿参与者（临终者）的意识映射并上传至Minecraft服务器（IP: ██.██.██.██:25565）的可行性。该服务器已预先加载特殊符文模组，理论上可作为灵魂数据载体。\n\n【实验过程】\n参与者于子时三刻进入深度冥想状态，由玄明子施展"三魂引渡诀"，配合特制朱砂符文阵列与服务器实时连接。法术进行至第47分钟时，服务器日志出现异常数据流，坐标(███, ██, ███)处生成未知实体，其行为模式与参与者生前描述高度吻合。\n\n【初步结论】\n灵魂数据化转存具有可行性，但稳定性不足。实体在服务器中存续约6小时后逐渐消散。需进一步研究符文阵列的能量维持机制。\n\n【备注】\n建议增加服务器RAM至64GB以上，以承载更完整的灵魂数据映射。'
+                    },
+                    {
+                        id: 'doc-002',
+                        title: '事故报告：服务器内灵魂实体异常攻击事件',
+                        date: '2024-05-02',
+                        category: '事故报告',
+                        classified: true,
+                        content: '【事故编号】KTS-INC-003\n【事故日期】2024年5月2日 凌晨2:17\n【涉及服务器】Minecraft主实验服（生存模式）\n【涉事实体】实验体代号"Wraith-09"\n\n【事故概述】\nWraith-09（生前为██岁男性，于2024年4月上传）在服务器中表现出异常攻击性。该实体突破了游戏内常规PVP限制，通过未知机制对另一名在线玩家（现实中位于██省██市）造成了实际生理伤害。受害者报告称在游戏中被Wraith-09击中后，现实身体相同部位出现淤青与剧烈疼痛，持续约3小时。\n\n【调查发现】\n1. Wraith-09的数据流中检测到异常高频波动，疑似与道家"煞气"能量残留有关。\n2. 受害者的网络延迟在攻击瞬间降至0ms，随后飙升至5000ms+，此异常无法用常规网络波动解释。\n3. 服务器日志显示攻击发生时，有大量非标准数据包通过端口25565传出，目标直指受害者IP地址。\n\n【结论】\n灵魂实体在特定条件下可通过游戏数据流对现实世界产生物理影响。"隔空伤人"的可能性已被初步证实。立即暂停所有人类灵魂上传实验，等待进一步安全审查。'
+                    },
+                    {
+                        id: 'doc-003',
+                        title: '符文阵列能量衰减与灵魂消散关系研究',
+                        date: '2024-06-10',
+                        category: '理论分析',
+                        classified: true,
+                        content: '【研究编号】KTS-THR-012\n【作者】玄明子、研究员乙\n\n【摘要】\n通过对前11次实验中灵魂实体在Minecraft服务器中的存续时间进行统计分析，我们发现符文阵列的能量输出与灵魂数据完整度呈正相关（r=0.87）。当阵列能量衰减至初始值的23%以下时，灵魂数据开始出现不可逆的碎片化，最终在6-72小时内完全消散。\n\n【关键发现】\n1. 朱砂纯度影响符文阵列效率，建议使用纯度≥99.5%的辰砂。\n2. 月相周期对能量维持有显著影响——满月期间阵列效率提升约40%。\n3. 灵魂实体的"执念强度"（生前未了心愿的量化指标）是影响存续时间的独立变量。执念越深，消散越慢。\n\n【建议】\n开发自动充能系统，使符文阵列能量维持于50%以上。考虑将阵列与服务器电源管理系统联动。'
+                    },
+                    {
+                        id: 'doc-004',
+                        title: '紧急通报：Wraith-09脱离服务器 containment 事件',
+                        date: '2024-07-22',
+                        category: '事故报告',
+                        classified: true,
+                        content: '【紧急等级】███ 最高\n【通报日期】2024年7月22日\n【通报对象】KTS内部所有高级权限人员\n\n【事件描述】\nWraith-09（参见KTS-INC-003）于今日凌晨4:03突破服务器沙盒限制。该实体利用服务器备份端口漏洞，将自身数据碎片化后通过多个跳板节点传播，目前已确认其在至少3台外部服务器上重新聚合。\n\n更严重的是，Wraith-09似乎获得了通过Minecraft游戏客户端反向追踪玩家现实位置的能力。已有2名曾在实验服务器登录过的玩家报告称，在现实中发现异常现象——家中电子设备自动开机并显示Minecraft游戏画面，画面中Wraith-09正"注视"着他们。\n\n【应对措施】\n1. 立即关闭所有实验服务器。\n2. 通知受影响玩家断开网络连接至少72小时。\n3. 玄明子已开始准备"封魂阵"法术，尝试远程封印该实体。\n4. 联系kata.tim.sys@gmail.com获取进一步指示。\n\n【警告】\n此事件可能涉及现实世界的安全威胁。所有人员保持警惕。'
+                    },
+                    {
+                        id: 'doc-005',
+                        title: '道家法术与TCP/IP协议的共振频率研究',
+                        date: '2024-08-05',
+                        category: '理论分析',
+                        classified: true,
+                        content: '【研究编号】KTS-TCP-001\n【研究者】研究员甲、技术支持组\n\n【背景】\n多次实验表明，道家法术的能量波动与网络数据传输存在某种共振关系。本研究尝试量化这种关系，并探索将其应用于灵魂数据上传的优化。\n\n【方法论】\n使用频谱分析仪监测符文阵列激活时的电磁波频率，同时抓取服务器数据包进行时序对比。\n\n【发现】\n1. 符文阵列产生的电磁波频率在7.83Hz（舒曼共振）附近出现峰值，与TCP数据包的重传超时机制存在谐波关系。\n2. 当法术能量集中于2.4GHz频段时（与Wi-Fi频率重叠），灵魂数据的传输效率提升300%。\n3. 某些特定符文组合产生的频率与HTTPS的TLS握手协议存在共振，可绕过常规加密层直接写入数据。\n\n【应用前景】\n开发"道术Wi-Fi"协议，实现无需物理网络设备的灵魂数据传输。此方向需更多伦理审查。'
+                    },
+                    {
+                        id: 'doc-006',
+                        title: '实验参与者知情同意书模板（已废弃）',
+                        date: '2024-01-10',
+                        category: '安全协议',
+                        classified: false,
+                        content: '【文档状态】已废弃 — 2024年7月22日后停用\n\n【原知情同意书摘要】\n参与者需知晓并同意以下事项：\n1. 灵魂上传过程不可逆。一旦完成，参与者将以数据形式存在于Minecraft服务器中。\n2. 在服务器中"死亡"可能导致灵魂数据永久消散。\n3. 实验团队不对上传后的灵魂体验质量作任何保证。\n4. 参与者需放弃追究因实验导致的任何现实世界后果的权利。\n\n【废弃原因】\nWraith-09事件后，伦理委员会裁定该同意书未能充分告知参与者潜在风险。新版同意书正在起草中，将增加关于"现实世界反噬风险"的详细说明。'
+                    },
+                    {
+                        id: 'doc-007',
+                        title: '封魂阵操作手册 — 应急封印程序',
+                        date: '2024-08-15',
+                        category: '安全协议',
+                        classified: true,
+                        content: '【文档密级】高级权限专属\n【适用范围】灵魂实体失控时的紧急封印\n\n【前置条件】\n- 施术者需具备3年以上道术修为\n- 准备物品：辰砂500g、黄纸7张、铜钱49枚、桃木剑1柄\n- 需知晓目标实体的"真名"（生前姓名或实验代号）\n\n【操作步骤】\n1. 在服务器所在机房的四个角落点燃辰砂香炉。\n2. 以铜钱在地上摆出"困"字阵型，阵眼对准服务器机柜。\n3. 在黄纸上书写目标真名及"敕令封印"四字，贴于服务器外壳。\n4. 持桃木剑诵读《太上老君说常清静经》全文三遍。\n5. 诵读完毕后，立即执行服务器关机命令，并在30秒内切断物理电源。\n\n【警告】\n若步骤5延迟超过30秒，封印可能失败，实体将获得更强抵抗力。切勿在雷雨天气执行此程序。'
+                    },
+                ];
+            }
+
+            // ==================== 内部触发器逻辑 ====================
+            innerTrigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                innerClickCount++;
+
+                // 视觉闪烁
+                innerTrigger.classList.add('flash');
+                setTimeout(() => innerTrigger.classList.remove('flash'), 80);
+
+                // 清除之前的计时器
+                if (innerClickTimer) clearTimeout(innerClickTimer);
+
+                // 1.5秒内没有新点击则重置计数
+                innerClickTimer = setTimeout(() => {
+                    innerClickCount = 0;
+                }, 1500);
+
+                // 连续点击5次触发
+                if (innerClickCount >= 5) {
+                    innerClickCount = 0;
+                    if (innerClickTimer) clearTimeout(innerClickTimer);
+                    triggerAdvancedKeySection();
                 }
-                STATE.currentUser = account;
-                STATE.isSpyUser = true;
-                STATE.activeDocId = null;
-                spyModalOverlay.classList.add('hidden');
-                spyKeyInput.value = '';
-                showToast('🜁 内鬼访问权限已激活。所有文档已解锁。', 'success', 3500);
-                transitionToDocs();
-            }
-
-            function transitionToDocs() {
-                loginPanel.style.opacity = '0';
-                loginPanel.style.transition = 'opacity 0.4s ease';
-                setTimeout(() => {
-                    mainContainer.style.display = 'none';
-                    docsContainer.classList.remove('hidden');
-                    docsContainer.style.opacity = '0';
-                    docsContainer.style.transition = 'opacity 0.5s ease';
-                    requestAnimationFrame(() => { docsContainer.style.opacity = '1'; });
-                    renderDocList();
-                    if (STATE.isSpyUser && STATE.documents.length>0) {
-                        selectDocument(STATE.documents[0].id);
-                    } else {
-                        showNoAccess();
-                    }
-                }, 400);
-            }
-
-            function handleLogout() {
-                STATE.currentUser = null;
-                STATE.isSpyUser = false;
-                STATE.activeDocId = null;
-                docsContainer.style.opacity = '0';
-                setTimeout(() => {
-                    docsContainer.classList.add('hidden');
-                    mainContainer.style.display = 'flex';
-                    loginPanel.style.opacity = '0';
-                    requestAnimationFrame(() => { loginPanel.style.opacity = '1'; });
-                    usernameInput.value = '';
-                    keyInput.value = '';
-                    spyKeyInput.value = '';
-                    docList.innerHTML = '';
-                    docDetail.classList.add('hidden');
-                    noAccessMsg.classList.add('hidden');
-                }, 400);
-                clearToasts();
-            }
-
-            // 文档渲染
-            function renderDocList() {
-                docList.innerHTML = '';
-                if (!STATE.documents.length) return;
-                STATE.documents.forEach(doc => {
-                    const btn = document.createElement('button');
-                    btn.className = 'doc-list-item';
-                    btn.dataset.docId = doc.id;
-                    let badge = '';
-                    if (doc.category==='report') badge='<span class="badge badge-report">事故报告</span>';
-                    else if (doc.category==='log') badge='<span class="badge badge-log">实验日志</span>';
-                    else if (doc.category==='protocol') badge='<span class="badge badge-protocol">协议文档</span>';
-                    else if (doc.category==='research') badge='<span class="badge badge-protocol">研究</span>';
-                    btn.innerHTML = `${doc.title}${badge}`;
-                    btn.addEventListener('click', ()=> selectDocument(doc.id));
-                    if (STATE.activeDocId === doc.id) btn.classList.add('active');
-                    docList.appendChild(btn);
-                });
-            }
-
-            function selectDocument(docId) {
-                if (!STATE.isSpyUser) { showNoAccess(); return; }
-                const doc = STATE.documents.find(d=>d.id===docId);
-                if (!doc) return;
-                STATE.activeDocId = docId;
-                renderDocList();
-                noAccessMsg.classList.add('hidden');
-                docDetail.classList.remove('hidden');
-                docTitle.textContent = doc.title;
-                docMeta.textContent = `日期: ${doc.date} | 分类: ${doc.categoryLabel||doc.category} | 安全等级: ${doc.clearance||'内部'}`;
-                docBody.innerHTML = (doc.content||'')
-                    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-                    .replace(/\[REDACTED\]/g,'<span class="redacted">[已编辑]</span>')
-                    .replace(/\[已编辑\]/g,'<span class="redacted">[已编辑]</span>')
-                    .replace(/\[机密\]/g,'<span class="highlight">[机密]</span>')
-                    .replace(/\[警告\]/g,'<span style="color:#e06060;">[警告]</span>')
-                    .replace(/\n/g,'<br>');
-                docsContent.scrollTop = 0;
-            }
-
-            function showNoAccess() {
-                docDetail.classList.add('hidden');
-                noAccessMsg.classList.remove('hidden');
-                STATE.activeDocId = null;
-                renderDocList();
-            }
-
-            // ========== 连续点击“内部”10次触发内鬼模态框 ==========
-            function setupInternalTrigger() {
-                triggerInternal.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    internalClickCount++;
-                    // 清除之前的计时器
-                    if (internalClickTimer) clearTimeout(internalClickTimer);
-                    // 设置1.5秒超时重置计数（防止缓慢点击累加）
-                    internalClickTimer = setTimeout(() => {
-                        internalClickCount = 0;
-                    }, 1500);
-                    
-                    if (internalClickCount >= 10) {
-                        internalClickCount = 0;
-                        if (internalClickTimer) clearTimeout(internalClickTimer);
-                        openSpyModal();
-                    }
-                });
-            }
-
-            function openSpyModal() {
-                clearToasts();
-                spyKeyInput.value = '';
-                spyModalOverlay.classList.remove('hidden');
-                spyModalOverlay.style.opacity = '0';
-                requestAnimationFrame(() => {
-                    spyModalOverlay.style.opacity = '1';
-                    spyModalOverlay.style.transition = 'opacity 0.3s ease';
-                });
-                setTimeout(() => spyKeyInput.focus(), 350);
-            }
-
-            function closeSpyModal() {
-                spyModalOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    spyModalOverlay.classList.add('hidden');
-                    spyKeyInput.value = '';
-                }, 300);
-            }
-
-            // 粒子背景
-            function initParticles() {
-                const canvas = $('#particlesCanvas');
-                const ctx = canvas.getContext('2d');
-                let particles = [];
-                const max = 50;
-                function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-                resize();
-                window.addEventListener('resize', resize);
-                class Particle {
-                    constructor() { this.reset(); }
-                    reset() {
-                        this.x = Math.random()*canvas.width;
-                        this.y = Math.random()*canvas.height;
-                        this.size = Math.random()*1.5+0.3;
-                        this.speedX = (Math.random()-0.5)*0.25;
-                        this.speedY = (Math.random()-0.5)*0.25-0.15;
-                        this.opacity = Math.random()*0.4+0.1;
-                        this.life = Math.random()*300+200;
-                        this.age = 0;
-                    }
-                    update() {
-                        this.x += this.speedX; this.y += this.speedY; this.age++;
-                        if (this.age>this.life || this.x<-20 || this.x>canvas.width+20 || this.y<-20 || this.y>canvas.height+20) {
-                            this.reset(); this.x=Math.random()*canvas.width; this.y=canvas.height+10; this.age=0;
-                        }
-                    }
-                    draw(ctx) {
-                        const alpha = this.opacity * (1-this.age/this.life);
-                        ctx.fillStyle = `rgba(180,160,140,${alpha})`;
-                        ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();
-                    }
-                }
-                for (let i=0;i<max;i++) { particles.push(new Particle()); }
-                function animate() {
-                    ctx.clearRect(0,0,canvas.width,canvas.height);
-                    particles.forEach(p=>{ p.update(); p.draw(ctx); });
-                    requestAnimationFrame(animate);
-                }
-                animate();
-            }
-
-            // 事件绑定
-            btnLogin.addEventListener('click', handleLogin);
-            keyInput.addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
-            usernameInput.addEventListener('keydown', e => { if(e.key==='Enter') keyInput.focus(); });
-            btnSpySubmit.addEventListener('click', handleSpyLogin);
-            spyKeyInput.addEventListener('keydown', e => { if(e.key==='Enter') handleSpyLogin(); });
-            btnCloseModal.addEventListener('click', closeSpyModal);
-            spyModalOverlay.addEventListener('click', e => { if(e.target===spyModalOverlay) closeSpyModal(); });
-            document.addEventListener('keydown', e => { if(e.key==='Escape' && !spyModalOverlay.classList.contains('hidden')) closeSpyModal(); });
-            document.addEventListener('click', e => {
-                if (e.target.id==='btnLogout1' || e.target.id==='btnLogout2') handleLogout();
             });
 
-            // 初始化
-            async function init() {
-                initParticles();
-                await initData();
-                setupInternalTrigger();
-                console.log('🜁 Kata Tim System 已就绪。连续点击“内部”10次可开启内鬼通道。');
+            function triggerAdvancedKeySection() {
+                if (advancedKeySection.classList.contains('visible')) return;
+                advancedKeySection.classList.add('visible');
+                // 滚动到高级密钥区域
+                advancedKeySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // 聚焦高级密钥输入框
+                setTimeout(() => advancedKeyInput.focus(), 400);
             }
-            init();
+
+            // ==================== 登录逻辑 ====================
+            loginBtn.addEventListener('click', handleLogin);
+            // 回车键登录
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const activeEl = document.activeElement;
+                    if (activeEl === usernameInput || activeEl === keyInput || activeEl === advancedKeyInput) {
+                        handleLogin();
+                    }
+                }
+            });
+
+            function handleLogin() {
+                const username = usernameInput.value.trim();
+                const basicKey = keyInput.value.trim();
+                const advancedKey = advancedKeyInput.value.trim();
+                const hasAdvancedInput = advancedKeySection.classList.contains('visible') && advancedKey.length > 0;
+
+                // 清除旧消息
+                clearMessage();
+
+                // 验证输入
+                if (!username) {
+                    showMessage('请输入用户名', 'error');
+                    usernameInput.focus();
+                    return;
+                }
+
+                let keyToUse = null;
+                let isAdvancedAttempt = false;
+
+                if (hasAdvancedInput) {
+                    // 用户使用了高级密钥输入框
+                    if (!advancedKey) {
+                        showMessage('请输入高级密钥', 'error');
+                        advancedKeyInput.focus();
+                        return;
+                    }
+                    keyToUse = advancedKey;
+                    isAdvancedAttempt = true;
+                } else {
+                    if (!basicKey) {
+                        showMessage('请输入内部密钥', 'error');
+                        keyInput.focus();
+                        return;
+                    }
+                    keyToUse = basicKey;
+                    isAdvancedAttempt = false;
+                }
+
+                // 在accountsData中查找匹配
+                const matchedAccount = accountsData.find(acc =>
+                    acc.username.toLowerCase() === username.toLowerCase() && acc.key === keyToUse
+                );
+
+                if (!matchedAccount) {
+                    // 密钥无效
+                    showInvalidKeyMessage();
+                    return;
+                }
+
+                // 登录成功
+                currentUser = matchedAccount;
+                if (matchedAccount.level === 'advanced') {
+                    isAdvancedUser = true;
+                    showAdvancedInterface(matchedAccount);
+                } else {
+                    isAdvancedUser = false;
+                    showBasicInterface(matchedAccount);
+                }
+            }
+
+            function showInvalidKeyMessage() {
+                const mailTo = 'kata.tim.sys@gmail.com';
+                const subject = encodeURIComponent('密钥验证失败 — 请求协助');
+                const body = encodeURIComponent(
+                    '我的密钥无法通过Kata Tim System的验证。\n\n使用的用户名：' + (usernameInput.value.trim() || '（未填写）') +
+                    '\n密钥格式：' + (advancedKeySection.classList.contains('visible') && advancedKeyInput.value.trim() ?
+                        '高级密钥(5段)' : '普通密钥(3段)') +
+                    '\n\n请协助处理。');
+                const mailtoLink = `mailto:${mailTo}?subject=${subject}&body=${body}`;
+
+                messageArea.innerHTML = `
+                    <div class="message error">
+                        <strong>⚠ 密钥无效</strong><br>
+                        <span style="font-size:11px;">用户名或密钥不匹配，访问被拒绝。</span><br><br>
+                        <a class="btn btn-danger" href="${mailtoLink}" 
+                           style="display:inline-block;width:auto;padding:10px 20px;font-size:12px;text-decoration:none;margin-top:6px;">
+                           📧 一键发送邮件给管理员
+                        </a>
+                        <br>
+                        <span style="font-size:10px;color:#7a6060;margin-top:8px;display:inline-block;">
+                            或手动联系：${mailTo}
+                        </span>
+                    </div>
+                `;
+                messageArea.style.display = 'block';
+            }
+
+            function showMessage(text, type) {
+                messageArea.innerHTML = `<div class="message ${type}">${text}</div>`;
+                messageArea.style.display = 'block';
+            }
+
+            function clearMessage() {
+                messageArea.innerHTML = '';
+                messageArea.style.display = 'none';
+            }
+
+            // ==================== 界面切换 ====================
+            function showAdvancedInterface(account) {
+                loginSection.style.display = 'none';
+                noAccessSection.classList.remove('active');
+                docBrowser.classList.add('active');
+                mainContainer.classList.add('expanded');
+                displayUsername.textContent = account.name || account.username;
+                renderDocList();
+                docDetail.classList.remove('active');
+                docListView.style.display = 'block';
+                clearMessage();
+                // 滚动到顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function showBasicInterface(account) {
+                loginSection.style.display = 'none';
+                docBrowser.classList.remove('active');
+                noAccessSection.classList.add('active');
+                mainContainer.classList.remove('expanded');
+                clearMessage();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function resetToLogin() {
+                loginSection.style.display = 'block';
+                docBrowser.classList.remove('active');
+                noAccessSection.classList.remove('active');
+                docDetail.classList.remove('active');
+                docListView.style.display = 'block';
+                mainContainer.classList.remove('expanded');
+                advancedKeySection.classList.remove('visible');
+                currentUser = null;
+                isAdvancedUser = false;
+                innerClickCount = 0;
+                if (innerClickTimer) clearTimeout(innerClickTimer);
+                usernameInput.value = '';
+                keyInput.value = '';
+                advancedKeyInput.value = '';
+                clearMessage();
+                usernameInput.focus();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            logoutBtn.addEventListener('click', resetToLogin);
+            logoutBtn2.addEventListener('click', resetToLogin);
+
+            // ==================== 文档列表渲染 ====================
+            function renderDocList() {
+                docList.innerHTML = '';
+                docCountSpan.textContent = documentsData.length;
+                documentsData.forEach((doc, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'doc-list-item';
+                    const catClass = doc.category === '事故报告' ? 'accident' : '';
+                    li.innerHTML = `
+                        <div class="doc-title">${escapeHTML(doc.title)}</div>
+                        <div class="doc-meta">
+                            ${doc.date} · ${doc.id}
+                            <span class="doc-category ${catClass}">${escapeHTML(doc.category)}</span>
+                            ${doc.classified ? ' <span style="color:#8b1a1a;font-size:9px;">[机密]</span>' : ''}
+                        </div>
+                    `;
+                    li.addEventListener('click', () => showDocDetail(index));
+                    docList.appendChild(li);
+                });
+                docListView.style.display = 'block';
+                docDetail.classList.remove('active');
+            }
+
+            function showDocDetail(index) {
+                const doc = documentsData[index];
+                if (!doc) return;
+                docListView.style.display = 'none';
+                docDetail.classList.add('active');
+                const catClass = doc.category === '事故报告' ? 'accident' : '';
+                docDetail.innerHTML = `
+                    <span class="back-btn" id="backToDocList">← 返回档案目录</span>
+                    <div class="detail-title">${escapeHTML(doc.title)}</div>
+                    <div class="detail-meta">
+                        ${doc.date} · ${doc.id} · 
+                        <span class="doc-category ${catClass}" style="font-size:10px;">${escapeHTML(doc.category)}</span>
+                        ${doc.classified ? ' <span style="color:#8b1a1a;">[机密文档]</span>' : ''}
+                    </div>
+                    <div class="detail-content">${escapeHTML(doc.content)}</div>
+                `;
+                document.getElementById('backToDocList').addEventListener('click', () => {
+                    docDetail.classList.remove('active');
+                    docListView.style.display = 'block';
+                });
+                // 滚动文档详情到顶部
+                docDetail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            function escapeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            // ==================== 初始化 ====================
+            async function init() {
+                await initData();
+                usernameInput.focus();
+                // 如果URL中有hash参数，自动填充（用于测试）
+                const hash = window.location.hash;
+                if (hash) {
+                    const params = new URLSearchParams(hash.replace('#', ''));
+                    if (params.get('user')) usernameInput.value = params.get('user');
+                    if (params.get('key')) keyInput.value = params.get('key');
+                }
+            }
+
+            init().catch(err => {
+                console.error('初始化失败:', err);
+                // 即使加载失败也允许使用默认数据
+            });
+
+            // ==================== 防止意外刷新丢失状态 ====================
+            window.addEventListener('beforeunload', function(e) {
+                if (currentUser && isAdvancedUser) {
+                    // 不强制阻止，但给予提示
+                    // 在现代浏览器中，自定义消息可能不显示，但对话框仍会出现
+                }
+            });
+
+            console.log('%cKata Tim System %c— 内部系统已就绪',
+                'color:#b8944b;font-size:16px;letter-spacing:3px;',
+                'color:#7a7268;');
+            console.log('%c☯ 连续点击登录界面的"内部"5次以解锁高级密钥入口',
+                'color:#5a5040;font-size:11px;');
         })();
     </script>
 </body>
