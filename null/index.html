@@ -1,11 +1,21 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>访问拒绝</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied</title>
     <style>
-        /* ===== 全局重置 & 基础 ===== */
+        :root {
+            --bg-deep: #0a0a0f;
+            --card-bg: rgba(18, 18, 30, 0.75);
+            --accent: #c0392b;
+            --accent-glow: #e74c3c;
+            --text-primary: #e0e0e0;
+            --text-muted: #8888a0;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --gold: #d4a853;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -17,328 +27,598 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', 'PingFang SC', Roboto, system-ui, -apple-system, sans-serif;
-            background: #0b0e1a;
-            /* 备用背景色 */
-            padding: 1.5rem;
-            position: relative;
+            font-family: 'Segoe UI', 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-deep);
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            cursor: default;
+            user-select: none;
         }
 
-        /* ===== 精美动态背景 ===== */
-        .bg-canvas {
+        /* ============ 动态背景层 ============ */
+        .bg-layer {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: 0;
-            background: radial-gradient(ellipse at 20% 50%, rgba(72, 49, 212, 0.25) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(212, 49, 120, 0.20) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(49, 180, 212, 0.15) 0%, transparent 50%),
-                linear-gradient(145deg, #0b0e1a 0%, #141b2d 45%, #1a0f24 100%);
-            background-attachment: fixed;
-        }
-
-        /* 浮动光晕粒子 */
-        .glow-orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
             pointer-events: none;
-            z-index: 0;
-            animation: floatOrb 18s ease-in-out infinite alternate;
         }
 
-        .glow-orb--1 {
-            width: 50vmax;
-            height: 50vmax;
-            top: -15%;
-            left: -10%;
-            background: radial-gradient(circle, rgba(120, 80, 255, 0.30), rgba(120, 80, 255, 0) 70%);
+        /* 深沉渐变光晕 */
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.35;
+            animation: orbDrift 18s ease-in-out infinite;
+        }
+        .bg-orb--1 {
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(180, 40, 30, 0.45) 0%, transparent 70%);
+            top: -20%;
+            left: -15%;
+            animation-delay: 0s;
+        }
+        .bg-orb--2 {
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, rgba(30, 40, 90, 0.5) 0%, transparent 70%);
+            bottom: -25%;
+            right: -10%;
+            animation-delay: -7s;
+            animation-duration: 20s;
+        }
+        .bg-orb--3 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(120, 40, 30, 0.35) 0%, transparent 70%);
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -12s;
             animation-duration: 22s;
         }
 
-        .glow-orb--2 {
-            width: 40vmax;
-            height: 40vmax;
-            bottom: -10%;
-            right: -8%;
-            background: radial-gradient(circle, rgba(255, 70, 150, 0.25), rgba(255, 70, 150, 0) 70%);
-            animation-duration: 26s;
-            animation-delay: -6s;
-        }
-
-        .glow-orb--3 {
-            width: 30vmax;
-            height: 30vmax;
-            top: 40%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: radial-gradient(circle, rgba(50, 200, 255, 0.18), rgba(50, 200, 255, 0) 70%);
-            animation-duration: 20s;
-            animation-delay: -10s;
-        }
-
-        @keyframes floatOrb {
-            0% {
+        @keyframes orbDrift {
+            0%,
+            100% {
                 transform: translate(0, 0) scale(1);
             }
-            33% {
-                transform: translate(3%, -4%) scale(1.08);
+            20% {
+                transform: translate(8%, -5%) scale(1.08);
             }
-            66% {
-                transform: translate(-2%, 5%) scale(0.92);
+            40% {
+                transform: translate(-4%, 7%) scale(0.94);
             }
-            100% {
-                transform: translate(4%, -2%) scale(1.05);
+            60% {
+                transform: translate(-7%, -3%) scale(1.05);
+            }
+            80% {
+                transform: translate(5%, 4%) scale(0.96);
             }
         }
 
-        /* 微妙的网格线条 (增强科技感) */
-        .grid-overlay {
+        /* 网格纹理 */
+        .grid-texture {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: 0;
+            pointer-events: none;
+            opacity: 0.04;
             background-image:
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+                linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
             background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        }
+
+        /* 细微噪点 */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.025;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        /* ============ 粒子画布 ============ */
+        canvas#particles {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
             pointer-events: none;
         }
 
-        /* ===== 主卡片 ===== */
+        /* ============ 主卡片 ============ */
+        .card-wrapper {
+            position: relative;
+            z-index: 10;
+            perspective: 800px;
+        }
+
         .card {
             position: relative;
-            z-index: 1;
-            max-width: 600px;
-            width: 100%;
-            padding: 3rem 2.5rem;
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(24px) saturate(1.6);
-            -webkit-backdrop-filter: blur(24px) saturate(1.6);
-            border-radius: 48px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow:
-                0 40px 80px rgba(0, 0, 0, 0.60),
-                0 0 0 1px rgba(255, 255, 255, 0.03) inset,
-                0 0 60px rgba(120, 80, 255, 0.08);
+            width: 560px;
+            max-width: 92vw;
+            padding: 56px 48px 50px;
+            background: var(--card-bg);
+            backdrop-filter: blur(28px) saturate(130%);
+            -webkit-backdrop-filter: blur(28px) saturate(130%);
+            border: 1px solid var(--border-subtle);
+            border-radius: 28px;
             text-align: center;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
-            animation: cardAppear 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-        }
-
-        .card:hover {
-            transform: translateY(-4px) scale(1.005);
             box-shadow:
-                0 50px 100px rgba(0, 0, 0, 0.70),
-                0 0 0 1px rgba(255, 255, 255, 0.06) inset,
-                0 0 80px rgba(120, 80, 255, 0.12);
+                0 8px 40px rgba(0, 0, 0, 0.55),
+                0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+                0 60px 100px -30px rgba(0, 0, 0, 0.6);
+            animation: cardEntry 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            transform-origin: center center;
         }
 
-        @keyframes cardAppear {
+        @keyframes cardEntry {
             0% {
                 opacity: 0;
-                transform: scale(0.92) translateY(30px);
+                transform: translateY(40px) scale(0.94);
+                filter: blur(6px);
             }
             100% {
                 opacity: 1;
-                transform: scale(1) translateY(0);
+                transform: translateY(0) scale(1);
+                filter: blur(0);
             }
         }
 
-        /* ===== 图标 / 符号 ===== */
-        .icon-wrapper {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 88px;
-            height: 88px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 70, 100, 0.25), rgba(200, 40, 80, 0.10));
-            border: 1px solid rgba(255, 70, 100, 0.25);
-            box-shadow: 0 0 50px rgba(255, 50, 80, 0.15);
-            margin-bottom: 1.8rem;
+        /* 卡片顶部微光条 */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 65%;
+            height: 1px;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.18) 20%,
+                    rgba(255, 255, 255, 0.35) 50%,
+                    rgba(255, 255, 255, 0.18) 80%,
+                    transparent);
+            border-radius: 1px;
         }
 
-        .icon-wrapper svg {
-            width: 44px;
-            height: 44px;
+        /* 角落装饰光点 */
+        .card::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 70% 30%, rgba(200, 60, 50, 0.25) 0%, transparent 70%);
+            border-radius: 0 28px 0 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ============ 图标区 ============ */
+        .icon-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 28px;
+            animation: iconPulse 3.5s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 18px rgba(220, 60, 50, 0.5));
+            }
+            50% {
+                transform: scale(1.06);
+                filter: drop-shadow(0 0 32px rgba(240, 70, 55, 0.75));
+            }
+        }
+
+        /* 六边形外框 */
+        .hex-frame {
+            position: absolute;
+            inset: -16px;
+            border: 2px solid rgba(200, 60, 50, 0.3);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            animation: hexRotate 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes hexRotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 盾牌图标 - 纯CSS */
+        .shield-icon {
+            position: relative;
+            width: 72px;
+            height: 86px;
+            display: inline-block;
+        }
+        .shield-icon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 6px 20px rgba(200, 40, 30, 0.55));
+        }
+        .shield-icon .shield-fill {
             fill: none;
-            stroke: #ff6b7c;
-            stroke-width: 1.8;
+            stroke: #e74c3c;
+            stroke-width: 2.8;
             stroke-linecap: round;
             stroke-linejoin: round;
-            filter: drop-shadow(0 0 12px rgba(255, 80, 100, 0.30));
+            stroke-dasharray: 300;
+            stroke-dashoffset: 300;
+            animation: shieldDraw 1.2s ease-out 0.2s forwards;
+        }
+        .shield-icon .shield-inner {
+            fill: rgba(220, 50, 40, 0.12);
+            stroke: none;
+            opacity: 0;
+            animation: shieldFillIn 0.8s ease-out 0.7s forwards;
+        }
+        .shield-icon .x-mark {
+            stroke: #f5f5f5;
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            stroke-dasharray: 60;
+            stroke-dashoffset: 60;
+            animation: xDraw 0.5s ease-out 1s forwards;
         }
 
-        /* ===== 文字 ===== */
-        .status-badge {
-            display: inline-block;
-            padding: 0.35rem 1.2rem;
-            border-radius: 100px;
-            background: rgba(255, 70, 100, 0.12);
-            border: 1px solid rgba(255, 70, 100, 0.20);
-            color: rgba(255, 150, 170, 0.9);
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            margin-bottom: 1.2rem;
-            backdrop-filter: blur(4px);
+        @keyframes shieldDraw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        @keyframes shieldFillIn {
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes xDraw {
+            to {
+                stroke-dashoffset: 0;
+            }
         }
 
-        .main-heading {
-            font-size: clamp(2.2rem, 8vw, 3.6rem);
+        /* ============ 文字区 ============ */
+        .title {
+            font-size: 1.7rem;
             font-weight: 700;
-            line-height: 1.15;
-            letter-spacing: -0.02em;
-            color: #fff;
-            margin-bottom: 0.6rem;
-            text-shadow: 0 2px 30px rgba(0, 0, 0, 0.40);
+            letter-spacing: 0.04em;
+            color: #f0f0f0;
+            margin-bottom: 8px;
+            animation: textFadeIn 0.7s ease-out 0.4s both;
+        }
+        .title .highlight {
+            color: #e74c3c;
+            text-shadow: 0 0 28px rgba(231, 76, 60, 0.55);
         }
 
-        .main-heading .highlight {
-            background: linear-gradient(135deg, #ff6b7c, #ff3b6f);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 30px rgba(255, 50, 80, 0.25));
+        .subtitle {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+            margin-bottom: 32px;
+            animation: textFadeIn 0.7s ease-out 0.55s both;
+        }
+        .subtitle .name {
+            font-weight: 600;
+            color: #d4a853;
+            letter-spacing: 0.05em;
         }
 
-        .sub-message {
-            font-size: clamp(1rem, 2.5vw, 1.2rem);
-            color: rgba(255, 255, 255, 0.60);
-            line-height: 1.7;
-            max-width: 420px;
-            margin: 0.8rem auto 2rem;
-            font-weight: 300;
-            letter-spacing: 0.01em;
+        @keyframes textFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .sub-message strong {
-            color: rgba(255, 255, 255, 0.85);
-            font-weight: 500;
-        }
-
-        /* ===== 分割装饰线 ===== */
+        /* 分割线 */
         .divider {
             width: 60px;
             height: 2px;
-            margin: 1.2rem auto 1.8rem;
-            background: linear-gradient(90deg, transparent, rgba(255, 100, 130, 0.40), transparent);
-            border-radius: 4px;
+            margin: 0 auto 28px;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(200, 60, 50, 0.7) 30%,
+                    rgba(200, 60, 50, 0.9) 50%,
+                    rgba(200, 60, 50, 0.7) 70%,
+                    transparent);
+            border-radius: 2px;
+            animation: textFadeIn 0.7s ease-out 0.65s both;
         }
 
-        /* ===== 底部状态 ===== */
-        .footer-note {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.25);
-            letter-spacing: 0.04em;
-            margin-top: 1.5rem;
-            padding-top: 1.2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        /* 描述文字 */
+        .description {
+            font-size: 0.88rem;
+            color: #9999b0;
+            line-height: 1.7;
+            letter-spacing: 0.02em;
+            animation: textFadeIn 0.7s ease-out 0.75s both;
         }
-
-        .footer-note .dot {
+        .description .code {
             display: inline-block;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: rgba(255, 70, 100, 0.35);
-            animation: pulseDot 2.4s ease-in-out infinite;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 2px 10px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            color: #d4a853;
+            letter-spacing: 0.04em;
+            margin: 0 2px;
         }
 
-        @keyframes pulseDot {
+        /* 底部闪烁红点 */
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e74c3c;
+            box-shadow: 0 0 10px #e74c3c, 0 0 25px rgba(231, 76, 60, 0.6);
+            margin-right: 6px;
+            animation: dotBlink 1.4s ease-in-out infinite;
+        }
+        @keyframes dotBlink {
             0%,
             100% {
-                opacity: 0.3;
-                transform: scale(0.8);
+                opacity: 1;
             }
             50% {
-                opacity: 1;
-                transform: scale(1.2);
+                opacity: 0.25;
             }
         }
 
-        /* ===== 响应式调整 ===== */
-        @media (max-width: 480px) {
+        .footer-note {
+            margin-top: 30px;
+            font-size: 0.78rem;
+            color: #66667a;
+            letter-spacing: 0.03em;
+            animation: textFadeIn 0.7s ease-out 0.85s both;
+        }
+
+        /* ============ 响应式 ============ */
+        @media (max-width: 600px) {
             .card {
-                padding: 2.2rem 1.5rem;
-                border-radius: 32px;
+                padding: 40px 24px 36px;
+                border-radius: 22px;
             }
-
-            .icon-wrapper {
-                width: 72px;
-                height: 72px;
+            .card::after {
+                border-radius: 0 22px 0 0;
+                width: 50px;
+                height: 50px;
             }
-
-            .icon-wrapper svg {
-                width: 36px;
-                height: 36px;
+            .title {
+                font-size: 1.35rem;
             }
-
-            .status-badge {
-                font-size: 0.65rem;
-                padding: 0.25rem 1rem;
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            .description {
+                font-size: 0.8rem;
+            }
+            .shield-icon {
+                width: 56px;
+                height: 67px;
+            }
+            .hex-frame {
+                inset: -11px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== 背景层 ===== -->
-    <div class="bg-canvas"></div>
-    <div class="glow-orb glow-orb--1"></div>
-    <div class="glow-orb glow-orb--2"></div>
-    <div class="glow-orb glow-orb--3"></div>
-    <div class="grid-overlay"></div>
+    <!-- 动态光晕背景 -->
+    <div class="bg-layer">
+        <div class="bg-orb bg-orb--1"></div>
+        <div class="bg-orb bg-orb--2"></div>
+        <div class="bg-orb bg-orb--3"></div>
+    </div>
+    <div class="grid-texture"></div>
+    <div class="noise-overlay"></div>
 
-    <!-- ===== 主卡片 ===== -->
-    <div class="card" role="alert" aria-live="assertive">
+    <!-- 粒子画布 -->
+    <canvas id="particles"></canvas>
 
-        <!-- 图标：禁止 / 锁 -->
-        <div class="icon-wrapper">
-            <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-                <circle cx="12" cy="16" r="0.6" fill="#ff6b7c" stroke="none" />
-                <line x1="12" y1="12" x2="12" y2="14.5" />
-            </svg>
+    <!-- 主卡片 -->
+    <div class="card-wrapper">
+        <div class="card">
+            <!-- 图标 -->
+            <div class="icon-container">
+                <div class="hex-frame"></div>
+                <div class="shield-icon">
+                    <!-- 盾牌 + X 标记 SVG -->
+                    <svg viewBox="0 0 72 86" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 盾牌外轮廓 -->
+                        <path class="shield-fill"
+                        d="M36 4 L66 16 L66 42 C66 60 52 74 36 82 C20 74 6 60 6 42 L6 16 Z" />
+                        <!-- 盾牌内部填充 -->
+                        <path class="shield-inner"
+                        d="M36 10 L60 20 L60 42 C60 57 48 69 36 76 C24 69 12 57 12 42 L12 20 Z" />
+                        <!-- X 标记 -->
+                        <line class="x-mark" x1="26" y1="34" x2="46" y2="54" />
+                        <line class="x-mark" x1="46" y1="34" x2="26" y2="54" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 标题 -->
+            <h1 class="title">
+                Access <span class="highlight">Denied</span>
+            </h1>
+
+            <!-- 副标题 -->
+            <p class="subtitle">
+                <span class="name">Liscat</span> has been <span style="color:#e74c3c;">blacklisted</span>.
+            </p>
+
+            <!-- 分割线 -->
+            <div class="divider"></div>
+
+            <!-- 描述 -->
+            <p class="description">
+                Your access credentials have been revoked.<br>
+                Reference code: <span class="code">BLK-2026-07-16</span>
+            </p>
+            <p class="description" style="margin-top:6px;">
+                If you believe this is an error, please contact<br>the system administrator for further review.
+            </p>
+
+            <!-- 底部状态 -->
+            <p class="footer-note">
+                <span class="status-dot"></span> Blacklist status: <strong style="color:#c0c0d0;">Active</strong>
+            </p>
         </div>
-
-        <!-- 状态标签 -->
-        <div class="status-badge">⛔ 拒绝访问</div>
-
-        <!-- 主标题 -->
-        <h1 class="main-heading">
-            Access <span class="highlight">Denied</span>
-        </h1>
-
-        <!-- 副标题 / 核心信息 -->
-        <p class="sub-message">
-            <strong>Liscat</strong> 已被列入黑名单。<br />
-            您的访问权限已被系统自动撤销。
-        </p>
-
-        <!-- 装饰分割 -->
-        <div class="divider"></div>
-
-        <!-- 底部状态 -->
-        <div class="footer-note">
-            <span class="dot"></span>
-            <span>安全策略 · 拒绝访问</span>
-            <span class="dot"></span>
-        </div>
-
     </div>
 
+    <script>
+        (function() {
+            const canvas = document.getElementById('particles');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            const PARTICLE_COUNT = 70;
+
+            // 粒子类
+            class Particle {
+                constructor() {
+                    this.reset(true);
+                }
+                reset(initial = false) {
+                    this.x = Math.random() * width;
+                    this.y = initial ? Math.random() * height : height + 20;
+                    this.size = Math.random() * 1.8 + 0.4;
+                    this.speedY = -(Math.random() * 0.35 + 0.12);
+                    this.speedX = (Math.random() - 0.5) * 0.3;
+                    this.opacity = Math.random() * 0.55 + 0.2;
+                    this.opacityFlicker = Math.random() * 0.015;
+                    this.hue = Math.random() < 0.3 ?
+                        Math.random() * 20 + 5 // 红-橙色调
+                        :
+                        Math.random() * 30 + 200; // 蓝-紫调
+                    this.saturation = Math.random() * 30 + 20;
+                    this.lightness = Math.random() * 40 + 40;
+                }
+                update() {
+                    this.y += this.speedY;
+                    this.x += this.speedX;
+                    this.opacity += (Math.random() - 0.5) * this.opacityFlicker;
+                    this.opacity = Math.max(0.05, Math.min(0.7, this.opacity));
+                    if (this.y < -20 || this.x < -20 || this.x > width + 20) {
+                        this.reset();
+                    }
+                }
+                draw(ctx) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.opacity})`;
+                    ctx.fill();
+                    // 微光晕
+                    if (this.size > 1 && this.opacity > 0.35) {
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
+                        ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.opacity * 0.12})`;
+                        ctx.fill();
+                    }
+                }
+            }
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+                // 重新分布粒子
+                particles.forEach(p => p.reset(true));
+            }
+
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw(ctx);
+                });
+                // 连线 - 仅近距离粒子之间
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 85) {
+                            const alpha = (1 - dist / 85) * 0.07;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(180,160,200,${alpha})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', () => {
+                resize();
+            });
+
+            resize();
+            initParticles();
+            animate();
+
+            // 鼠标交互 - 轻微排斥粒子
+            let mouseX = -200;
+            let mouseY = -200;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            document.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0) {
+                    mouseX = e.touches[0].clientX;
+                    mouseY = e.touches[0].clientY;
+                }
+            }, { passive: true });
+
+            // 在animate中附加鼠标交互
+            const originalUpdate = Particle.prototype.update;
+            Particle.prototype.update = function() {
+                originalUpdate.call(this);
+                const dx = this.x - mouseX;
+                const dy = this.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 100) {
+                    const force = (1 - dist / 100) * 0.6;
+                    this.x += (dx / dist) * force;
+                    this.y += (dy / dist) * force;
+                }
+            };
+        })();
+    </script>
 </body>
 </html>
