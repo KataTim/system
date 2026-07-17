@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素冒險 - Pixel Adventure</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', 'Microsoft JhengHei', monospace;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #game-container {
+            position: relative;
+            border: 6px solid #4a3728;
+            border-radius: 8px;
+            box-shadow:
+                0 0 0 3px #2a1f14,
+                0 0 30px rgba(0, 0, 0, 0.6),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+            background: #000;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            transition: border-color 0.3s;
+        }
+
+        #game-container.collected-all {
+            border-color: #f0c040;
+            box-shadow:
+                0 0 0 3px #8b6914,
+                0 0 40px rgba(240, 192, 64, 0.5),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            max-width: min(960px, 95vw);
+            max-height: min(720px, 85vh);
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4/3;
+            cursor: default;
+        }
+
+        #ui-overlay {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 16px;
+            pointer-events: none;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .ui-badge {
+            background: rgba(0, 0, 0, 0.75);
+            color: #f0e0c0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            border: 2px solid #5a4a30;
+            font-family: 'Courier New', 'Microsoft JhengHei', monospace;
+            white-space: nowrap;
+            backdrop-filter: blur(4px);
+        }
+
+        .ui-badge.treasure {
+            border-color: #c89830;
+            color: #f0d060;
+            animation: glow-pulse 1.8s ease-in-out infinite;
+        }
+
+        .ui-badge.treasure.all-done {
+            border-color: #f0c040;
+            color: #ffe880;
+            animation: glow-pulse 0.6s ease-in-out infinite;
+            background: rgba(40, 30, 0, 0.85);
+        }
+
+        @keyframes glow-pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(200, 150, 40, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(240, 200, 60, 0.7);
+            }
+        }
+
+        #mobile-controls {
+            display: none;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 300px;
+        }
+
+        .ctrl-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            border: 3px solid #5a4a30;
+            background: rgba(30, 20, 10, 0.8);
+            color: #d0c0a0;
+            font-size: 22px;
+            cursor: pointer;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ctrl-btn:active {
+            background: rgba(80, 60, 30, 0.9);
+            border-color: #c89830;
+        }
+        .ctrl-btn.action {
+            width: 64px;
+            background: rgba(60, 20, 10, 0.8);
+            border-color: #8b4513;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            #mobile-controls {
+                display: flex;
+            }
+            #game-container {
+                border-width: 4px;
+            }
+            .ui-badge {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-overlay">
+            <span class="ui-badge treasure" id="treasureBadge">💎 寶箱: 0/3</span>
+            <span class="ui-badge" id="hintBadge">🅴 互動</span>
+        </div>
+    </div>
+
+    <div id="mobile-controls">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <button class="ctrl-btn" data-key="ArrowUp">▲</button>
+            <div style="display:flex;gap:4px;">
+                <button class="ctrl-btn" data-key="ArrowLeft">◀</button>
+                <button class="ctrl-btn" data-key="ArrowDown">▼</button>
+                <button class="ctrl-btn" data-key="ArrowRight">▶</button>
+            </div>
+        </div>
+        <button class="ctrl-btn action" data-key="KeyE">🅴<br>互動</button>
+    </div>
+
+    <!-- 載入素材文件 -->
+    <script src="assets.js">
+        /* 若無法載入，請確認 assets.js 與本文件在同一目錄 */
+    </script>
+    <!-- 載入地圖文件 -->
+    <script src="map.js">
+        /* 若無法載入，請確認 map.js 與本文件在同一目錄 */
+    </script>
+
+    <script>
+        // ============================================================
+        //  遊戲主程式 - game.html (內嵌邏輯，依賴 assets.js & map.js)
+        // ============================================================
+
+        (function() {
+            // ----- 檢查依賴 -----
+            if (typeof Assets === 'undefined') {
+                document.body.innerHTML =
+                    '<div style="color:#f88;text-align:center;padding:40px;font-family:monospace;">' +
+                    '<h2>⚠ 缺少 assets.js</h2><p>請確認 assets.js 與 game.html 在同一目錄下。</p></div>';
+                return;
+            }
+            if (typeof GameMap === 'undefined') {
+                document.body.innerHTML =
+                    '<div style="color:#f88;text-align:center;padding:40px;font-family:monospace;">' +
+                    '<h2>⚠ 缺少 map.js</h2><p>請確認 map.js 與 game.html 在同一目錄下。</p></div>';
+                return;
+            }
+
+            // ----- DOM 元素 -----
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('game-container');
+            const treasureBadge = document.getElementById('treasureBadge');
+            const hintBadge = document.getElementById('hintBadge');
+            const mobileControls = document.getElementById('mobile-controls');
+
+            // ----- 常數 -----
+            const TILE_SIZE = 32;
+            const VIEW_W = 20; // 視野寬（瓦片數）
+            const VIEW_H = 15; // 視野高（瓦片數）
+            const CANVAS_W = VIEW_W * TILE_SIZE; // 640
+            const CANVAS_H = VIEW_H * TILE_SIZE; // 480
+            const PLAYER_SPEED = 160; // 每秒像素
+            const PLAYER_SIZE = 22; // 碰撞盒大小
+            const INTERACT_RANGE = 38; // 互動距離
+
+            // ----- 畫布設定 -----
+            canvas.width = CANVAS_W;
+            canvas.height = CANVAS_H;
+            canvas.style.width = 'min(960px, 95vw)';
+            canvas.style.height = 'auto';
+            canvas.style.aspectRatio = '4/3';
+
+            // ----- 地圖資料 -----
+            const mapData = GameMap.tileMap; // 2D陣列 [row][col]
+            const MAP_ROWS = mapData.length;
+            const MAP_COLS = mapData[0].length;
+            const MAP_PX_W = MAP_COLS * TILE_SIZE;
+            const MAP_PX_H = MAP_ROWS * TILE_SIZE;
+
+            // ----- 不可通行瓦片 -----
+            const SOLID_TILES = new Set([2, 3, 4, 7]); // 樹、水、房屋牆、石頭
+
+            // ----- 實體（寶箱 & NPC）----- 
+            let treasures = GameMap.treasures.map((t, i) => ({
+                id: i,
+                x: t.x,
+                y: t.y,
+                collected: false,
+                sparkTimer: Math.random() * Math.PI * 2,
+            }));
+            let npcs = GameMap.npcs.map(n => ({
+                ...n,
+                talkTimer: 0,
+            }));
+
+            // ----- 玩家狀態 -----
+            let player = {
+                x: GameMap.playerStart.x,
+                y: GameMap.playerStart.y,
+                dir: 'down', // 'down' | 'up' | 'left' | 'right'
+                moving: false,
+                animFrame: 0,
+                animTimer: 0,
+                footstepTimer: 0,
+            };
+
+            // ----- 攝像機 -----
+            let camera = {
+                x: player.x - CANVAS_W / 2 + TILE_SIZE / 2,
+                y: player.y - CANVAS_H / 2 + TILE_SIZE / 2,
+                targetX: 0,
+                targetY: 0,
+            };
+            camera.targetX = camera.x;
+            camera.targetY = camera.y;
+
+            // ----- 輸入 -----
+            const keys = {};
+            let interactPressed = false;
+            let interactJustPressed = false;
+
+            window.addEventListener('keydown', e => {
+                keys[e.code] = true;
+                if (e.code === 'KeyE' || e.code === 'Space') {
+                    if (!interactPressed) interactJustPressed = true;
+                    interactPressed = true;
+                }
+                e.preventDefault();
+            });
+            window.addEventListener('keyup', e => {
+                keys[e.code] = false;
+                if (e.code === 'KeyE' || e.code === 'Space') {
+                    interactPressed = false;
+                }
+                e.preventDefault();
+            });
+
+            // ----- 手機控制 -----
+            mobileControls.querySelectorAll('.ctrl-btn').forEach(btn => {
+                const key = btn.dataset.key;
+                btn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    keys[key] = true;
+                    if (key === 'KeyE') {
+                        if (!interactPressed) interactJustPressed = true;
+                        interactPressed = true;
+                    }
+                });
+                btn.addEventListener('pointerup', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                    if (key === 'KeyE') interactPressed = false;
+                });
+                btn.addEventListener('pointerleave', (e) => {
+                    keys[key] = false;
+                    if (key === 'KeyE') interactPressed = false;
+                });
+                btn.addEventListener('pointercancel', (e) => {
+                    keys[key] = false;
+                    if (key === 'KeyE') interactPressed = false;
+                });
+            });
+
+            // ----- 粒子系統 -----
+            let particles = [];
+
+            function spawnParticles(x, y, color, count = 18) {
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 40 + Math.random() * 140;
+                    particles.push({
+                        x,
+                        y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 30,
+                        life: 0.5 + Math.random() * 0.7,
+                        maxLife: 0.5 + Math.random() * 0.7,
+                        color,
+                        size: 2 + Math.random() * 4,
+                    });
+                }
+            }
+
+            function updateParticles(dt) {
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.life -= dt;
+                    if (p.life <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+                    p.x += p.vx * dt;
+                    p.y += p.vy * dt;
+                    p.vy += 120 * dt; // 重力
+                    p.size *= 0.995;
+                }
+            }
+
+            function drawParticles(ctx, camX, camY) {
+                for (const p of particles) {
+                    const alpha = Math.max(0, p.life / p.maxLife);
+                    const sx = Math.floor(p.x - camX);
+                    const sy = Math.floor(p.y - camY);
+                    if (sx < -10 || sy < -10 || sx > CANVAS_W + 10 || sy > CANVAS_H + 10) continue;
+                    ctx.fillStyle = p.color.replace('1)', `${alpha})`).replace('rgb',
+                        'rgba');
+                    ctx.fillRect(Math.floor(sx), Math.floor(sy), Math.ceil(p.size), Math.ceil(p.size));
+                }
+            }
+
+            // ----- 對話框 -----
+            let dialogText = '';
+            let dialogTimer = 0;
+            const DIALOG_DURATION = 3.5;
+
+            function showDialog(text) {
+                dialogText = text;
+                dialogTimer = DIALOG_DURATION;
+            }
+
+            // ----- 收集計數 -----
+            let collectedCount = 0;
+            const TOTAL_TREASURES = treasures.length;
+
+            function updateUI() {
+                treasureBadge.textContent = `💎 寶箱: ${collectedCount}/${TOTAL_TREASURES}`;
+                if (collectedCount >= TOTAL_TREASURES && TOTAL_TREASURES > 0) {
+                    treasureBadge.classList.add('all-done');
+                    treasureBadge.textContent = `✨ 全收集! ${collectedCount}/${TOTAL_TREASURES}`;
+                    container.classList.add('collected-all');
+                } else {
+                    treasureBadge.classList.remove('all-done');
+                    container.classList.remove('collected-all');
+                }
+            }
+
+            // ----- 碰撞檢測 -----
+            function isSolidAtPixel(px, py) {
+                const col = Math.floor(px / TILE_SIZE);
+                const row = Math.floor(py / TILE_SIZE);
+                if (row < 0 || row >= MAP_ROWS || col < 0 || col >= MAP_COLS) return true;
+                return SOLID_TILES.has(mapData[row][col]);
+            }
+
+            function canMoveTo(px, py) {
+                // 檢查玩家矩形四個角 + 四邊中點
+                const half = PLAYER_SIZE / 2;
+                const checkPoints = [
+                    { x: px - half, y: py - half },
+                    { x: px + half, y: py - half },
+                    { x: px - half, y: py + half },
+                    { x: px + half, y: py + half },
+                    { x: px, y: py - half },
+                    { x: px, y: py + half },
+                    { x: px - half, y: py },
+                    { x: px + half, y: py },
+                ];
+                for (const cp of checkPoints) {
+                    if (isSolidAtPixel(cp.x, cp.y)) return false;
+                }
+                return true;
+            }
+
+            // ----- 互動檢查 -----
+            function checkInteract() {
+                const px = player.x;
+                const py = player.y;
+
+                // 檢查寶箱
+                for (const t of treasures) {
+                    if (t.collected) continue;
+                    const dx = px - t.x;
+                    const dy = py - t.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < INTERACT_RANGE) {
+                        // 收集寶箱
+                        t.collected = true;
+                        collectedCount++;
+                        spawnParticles(t.x, t.y, 'rgb(240,200,80)', 25);
+                        spawnParticles(t.x, t.y, 'rgb(255,220,100)', 15);
+                        showDialog('🎉 找到寶箱！' + (collectedCount >= TOTAL_TREASURES ? ' 全部收集完畢！' :
+                            ` (${collectedCount}/${TOTAL_TREASURES})`));
+                        updateUI();
+                        return;
+                    }
+                }
+
+                // 檢查NPC
+                for (const npc of npcs) {
+                    const dx = px - npc.x;
+                    const dy = py - npc.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < INTERACT_RANGE) {
+                        npc.talkTimer = 1.5;
+                        showDialog(npc.dialog);
+                        // 面向NPC
+                        if (Math.abs(dx) > Math.abs(dy)) {
+                            player.dir = dx > 0 ? 'left' : 'right';
+                        } else {
+                            player.dir = dy > 0 ? 'up' : 'down';
+                        }
+                        return;
+                    }
+                }
+            }
+
+            // ----- 更新玩家 -----
+            function updatePlayer(dt) {
+                // 讀取輸入方向
+                let moveX = 0;
+                let moveY = 0;
+                if (keys['ArrowLeft'] || keys['KeyA']) moveX -= 1;
+                if (keys['ArrowRight'] || keys['KeyD']) moveX += 1;
+                if (keys['ArrowUp'] || keys['KeyW']) moveY -= 1;
+                if (keys['ArrowDown'] || keys['KeyS']) moveY += 1;
+
+                // 正規化
+                const mag = Math.sqrt(moveX * moveX + moveY * moveY);
+                if (mag > 1) {
+                    moveX /= mag;
+                    moveY /= mag;
+                }
+
+                const wasMoving = player.moving;
+                player.moving = mag > 0.01;
+
+                // 更新方向
+                if (player.moving) {
+                    if (Math.abs(moveX) > Math.abs(moveY)) {
+                        player.dir = moveX > 0 ? 'right' : 'left';
+                    } else {
+                        player.dir = moveY > 0 ? 'down' : 'up';
+                    }
+                }
+
+                // 嘗試移動
+                const newX = player.x + moveX * PLAYER_SPEED * dt;
+                const newY = player.y + moveY * PLAYER_SPEED * dt;
+
+                // 分軸檢測（滑動效果）
+                if (moveX !== 0 && canMoveTo(newX, player.y)) {
+                    player.x = newX;
+                } else if (moveX !== 0 && canMoveTo(newX, player.y - 2)) {
+                    player.x = newX;
+                    player.y -= 1;
+                } else if (moveX !== 0 && canMoveTo(newX, player.y + 2)) {
+                    player.x = newX;
+                    player.y += 1;
+                }
+
+                if (moveY !== 0 && canMoveTo(player.x, newY)) {
+                    player.y = newY;
+                } else if (moveY !== 0 && canMoveTo(player.x - 2, newY)) {
+                    player.y = newY;
+                    player.x -= 1;
+                } else if (moveY !== 0 && canMoveTo(player.x + 2, newY)) {
+                    player.y = newY;
+                    player.x += 1;
+                }
+
+                // 限制在地圖內
+                const half = PLAYER_SIZE / 2;
+                player.x = Math.max(half, Math.min(MAP_PX_W - half, player.x));
+                player.y = Math.max(half, Math.min(MAP_PX_H - half, player.y));
+
+                // 動畫計時器
+                if (player.moving) {
+                    player.animTimer += dt;
+                    if (player.animTimer > 0.15) {
+                        player.animTimer = 0;
+                        player.animFrame = (player.animFrame + 1) % 4;
+                    }
+                    player.footstepTimer += dt;
+                } else {
+                    player.animTimer = 0;
+                    player.animFrame = 0;
+                    player.footstepTimer = 0;
+                }
+            }
+
+            // ----- 更新攝像機 -----
+            function updateCamera(dt) {
+                camera.targetX = player.x - CANVAS_W / 2;
+                camera.targetY = player.y - CANVAS_H / 2;
+
+                // 限制攝像機不超出地圖
+                camera.targetX = Math.max(0, Math.min(MAP_PX_W - CANVAS_W, camera.targetX));
+                camera.targetY = Math.max(0, Math.min(MAP_PX_H - CANVAS_H, camera.targetY));
+
+                // 平滑跟隨
+                const lerpSpeed = 8;
+                camera.x += (camera.targetX - camera.x) * Math.min(1, lerpSpeed * dt);
+                camera.y += (camera.targetY - camera.y) * Math.min(1, lerpSpeed * dt);
+            }
+
+            // ----- 繪製 -----
+            function drawMap() {
+                const camX = Math.floor(camera.x);
+                const camY = Math.floor(camera.y);
+
+                // 計算可見瓦片範圍
+                const startCol = Math.max(0, Math.floor(camX / TILE_SIZE));
+                const startRow = Math.max(0, Math.floor(camY / TILE_SIZE));
+                const endCol = Math.min(MAP_COLS - 1, Math.ceil((camX + CANVAS_W) / TILE_SIZE));
+                const endRow = Math.min(MAP_ROWS - 1, Math.ceil((camY + CANVAS_H) / TILE_SIZE));
+
+                // 繪製瓦片
+                for (let row = startRow; row <= endRow; row++) {
+                    for (let col = startCol; col <= endCol; col++) {
+                        const tileType = mapData[row][col];
+                        const tileImg = Assets.tiles[tileType];
+                        const sx = col * TILE_SIZE - camX;
+                        const sy = row * TILE_SIZE - camY;
+                        if (tileImg) {
+                            ctx.drawImage(tileImg, Math.floor(sx), Math.floor(sy), TILE_SIZE, TILE_SIZE);
+                        } else {
+                            // fallback
+                            ctx.fillStyle = '#ff00ff';
+                            ctx.fillRect(Math.floor(sx), Math.floor(sy), TILE_SIZE, TILE_SIZE);
+                        }
+                    }
+                }
+
+                // 繪製寶箱（未收集的）
+                for (const t of treasures) {
+                    if (t.collected) continue;
+                    const sx = Math.floor(t.x - camX - TILE_SIZE / 2);
+                    const sy = Math.floor(t.y - camY - TILE_SIZE / 2);
+                    // 閃爍效果
+                    t.sparkTimer += 0.05;
+                    const sparkAlpha = 0.6 + 0.4 * Math.sin(t.sparkTimer * 3);
+                    const chestImg = Assets.tiles[8]; // 寶箱瓦片
+                    if (chestImg) {
+                        ctx.drawImage(chestImg, sx, sy, TILE_SIZE, TILE_SIZE);
+                    }
+                    // 閃光
+                    const glowSize = TILE_SIZE + 4 + Math.sin(t.sparkTimer * 4) * 4;
+                    ctx.fillStyle = `rgba(255,220,80,${sparkAlpha * 0.35})`;
+                    ctx.beginPath();
+                    ctx.arc(t.x - camX, t.y - camY, glowSize / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // 小提示箭頭
+                    const arrowY = sy - 10 + Math.sin(t.sparkTimer * 2) * 3;
+                    ctx.fillStyle = `rgba(255,255,200,${sparkAlpha})`;
+                    ctx.font = '10px "Courier New", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('▼', t.x - camX, arrowY);
+                }
+
+                // 繪製NPC
+                for (const npc of npcs) {
+                    const sx = Math.floor(npc.x - camX - TILE_SIZE / 2);
+                    const sy = Math.floor(npc.y - camY - TILE_SIZE / 2);
+                    const npcImg = Assets.npcFrame;
+                    if (npcImg) {
+                        ctx.drawImage(npcImg, sx, sy, TILE_SIZE, TILE_SIZE);
+                    }
+                    // NPC頭頂標記
+                    if (npc.talkTimer > 0) {
+                        const alpha = Math.min(1, npc.talkTimer);
+                        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+                        ctx.font = '11px "Courier New", monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('💬', npc.x - camX, sy - 6);
+                    }
+                    // 感嘆號（常駐）
+                    const exY = sy - 8 + Math.sin(Date.now() / 600) * 2;
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 10px "Courier New", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('!', npc.x - camX, exY);
+                }
+
+                // 繪製玩家
+                const playerSx = Math.floor(player.x - camX - TILE_SIZE / 2);
+                const playerSy = Math.floor(player.y - camY - TILE_SIZE / 2);
+                const playerFrame = Assets.getPlayerFrame(player.dir, player.animFrame, player.moving);
+                if (playerFrame) {
+                    ctx.drawImage(playerFrame, playerSx, playerSy, TILE_SIZE, TILE_SIZE);
+                } else {
+                    // fallback
+                    ctx.fillStyle = '#4488ff';
+                    ctx.fillRect(playerSx + 4, playerSy + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+                }
+
+                // 繪製粒子
+                drawParticles(ctx, camX, camY);
+
+                // 繪製對話框
+                if (dialogTimer > 0) {
+                    const alpha = Math.min(1, dialogTimer / 0.4);
+                    const boxW = Math.min(CANVAS_W - 40, ctx.measureText(dialogText).width + 40);
+                    const boxH = 44;
+                    const boxX = (CANVAS_W - boxW) / 2;
+                    const boxY = CANVAS_H - boxH - 30;
+
+                    ctx.fillStyle = `rgba(0,0,0,${0.8 * alpha})`;
+                    ctx.strokeStyle = `rgba(200,170,100,${alpha})`;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.roundRect(boxX, boxY, boxW, boxH, 10);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = `rgba(255,240,210,${alpha})`;
+                    ctx.font = '14px "Courier New", "Microsoft JhengHei", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(dialogText, CANVAS_W / 2, boxY + boxH / 2);
+                    ctx.textBaseline = 'alphabetic';
+                }
+            }
+
+            // ----- 遊戲循環 -----
+            let lastTime = performance.now();
+            let totalTime = 0;
+
+            function gameLoop(timestamp) {
+                let dt = (timestamp - lastTime) / 1000;
+                if (dt <= 0) dt = 0.016;
+                if (dt > 0.2) dt = 0.2; // 防止大幀跳
+                lastTime = timestamp;
+                totalTime += dt;
+
+                // 更新
+                updatePlayer(dt);
+                updateCamera(dt);
+                updateParticles(dt);
+
+                // 互動
+                if (interactJustPressed) {
+                    interactJustPressed = false;
+                    checkInteract();
+                }
+
+                // NPC計時器
+                for (const npc of npcs) {
+                    if (npc.talkTimer > 0) npc.talkTimer -= dt;
+                }
+
+                // 對話計時器
+                if (dialogTimer > 0) {
+                    dialogTimer -= dt;
+                    if (dialogTimer < 0) dialogTimer = 0;
+                }
+
+                // 更新提示徽章
+                let nearInteractable = false;
+                const px = player.x;
+                const py = player.y;
+                for (const t of treasures) {
+                    if (t.collected) continue;
+                    const d = Math.sqrt((px - t.x) ** 2 + (py - t.y) ** 2);
+                    if (d < INTERACT_RANGE) { nearInteractable = true; break; }
+                }
+                if (!nearInteractable) {
+                    for (const npc of npcs) {
+                        const d = Math.sqrt((px - npc.x) ** 2 + (py - npc.y) ** 2);
+                        if (d < INTERACT_RANGE) { nearInteractable = true; break; }
+                    }
+                }
+                hintBadge.style.opacity = nearInteractable ? '1' : '0.45';
+                hintBadge.textContent = nearInteractable ? '🅴 互動!' : '🅴 互動';
+
+                // 清除畫布
+                ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+                // 繪製
+                drawMap();
+
+                // 繪製簡易小地圖（右上角）
+                drawMiniMap();
+
+                // 請求下一幀
+                requestAnimationFrame(gameLoop);
+            }
+
+            // ----- 小地圖 -----
+            function drawMiniMap() {
+                const mmScale = 3; // 每個瓦片3px
+                const mmW = MAP_COLS * mmScale;
+                const mmH = MAP_ROWS * mmScale;
+                const mmX = CANVAS_W - mmW - 8;
+                const mmY = 8;
+
+                // 背景
+                ctx.fillStyle = 'rgba(0,0,0,0.65)';
+                ctx.fillRect(mmX - 2, mmY - 2, mmW + 4, mmH + 4);
+                ctx.strokeStyle = 'rgba(180,150,100,0.7)';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(mmX - 2, mmY - 2, mmW + 4, mmH + 4);
+
+                // 繪製地圖
+                for (let row = 0; row < MAP_ROWS; row++) {
+                    for (let col = 0; col < MAP_COLS; col++) {
+                        const t = mapData[row][col];
+                        let color;
+                        switch (t) {
+                            case 0:
+                                color = '#7ec850';
+                                break;
+                            case 1:
+                                color = '#c8b878';
+                                break;
+                            case 2:
+                                color = '#3d7a2f';
+                                break;
+                            case 3:
+                                color = '#4a90d9';
+                                break;
+                            case 4:
+                                color = '#d8c8a0';
+                                break;
+                            case 5:
+                                color = '#c89860';
+                                break;
+                            case 6:
+                                color = '#8ec860';
+                                break;
+                            case 7:
+                                color = '#909090';
+                                break;
+                            default:
+                                color = '#555';
+                        }
+                        ctx.fillStyle = color;
+                        ctx.fillRect(mmX + col * mmScale, mmY + row * mmScale, mmScale, mmScale);
+                    }
+                }
+
+                // 寶箱位置
+                for (const t of treasures) {
+                    if (t.collected) continue;
+                    const tCol = Math.floor(t.x / TILE_SIZE);
+                    const tRow = Math.floor(t.y / TILE_SIZE);
+                    ctx.fillStyle = '#f0d040';
+                    ctx.fillRect(mmX + tCol * mmScale, mmY + tRow * mmScale, mmScale, mmScale);
+                }
+
+                // NPC位置
+                for (const npc of npcs) {
+                    const nCol = Math.floor(npc.x / TILE_SIZE);
+                    const nRow = Math.floor(npc.y / TILE_SIZE);
+                    ctx.fillStyle = '#ff9060';
+                    ctx.fillRect(mmX + nCol * mmScale, mmY + nRow * mmScale, mmScale, mmScale);
+                }
+
+                // 玩家位置
+                const pCol = player.x / TILE_SIZE;
+                const pRow = player.y / TILE_SIZE;
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(mmX + pCol * mmScale - 1, mmY + pRow * mmScale - 1, mmScale + 2, mmScale + 2);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 0.8;
+                ctx.strokeRect(mmX + pCol * mmScale - 1, mmY + pRow * mmScale - 1, mmScale + 2, mmScale + 2);
+
+                // 視野框
+                const vx = camera.x / TILE_SIZE;
+                const vy = camera.y / TILE_SIZE;
+                ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+                ctx.lineWidth = 0.8;
+                ctx.strokeRect(mmX + vx * mmScale, mmY + vy * mmScale, VIEW_W * mmScale, VIEW_H * mmScale);
+            }
+
+            // ----- 初始化 -----
+            function init() {
+                updateUI();
+                hintBadge.style.opacity = '0.45';
+                // 初始攝像機位置
+                camera.x = player.x - CANVAS_W / 2;
+                camera.y = player.y - CANVAS_H / 2;
+                camera.targetX = camera.x;
+                camera.targetY = camera.y;
+                camera.x = Math.max(0, Math.min(MAP_PX_W - CANVAS_W, camera.x));
+                camera.y = Math.max(0, Math.min(MAP_PX_H - CANVAS_H, camera.y));
+                camera.targetX = camera.x;
+                camera.targetY = camera.y;
+            }
+
+            // ----- 啟動 -----
+            init();
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+
+            // ----- 檢測是否為移動裝置 -----
+            if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768) {
+                mobileControls.style.display = 'flex';
+            }
+            window.addEventListener('resize', () => {
+                if (window.innerWidth < 768) {
+                    mobileControls.style.display = 'flex';
+                } else {
+                    mobileControls.style.display = 'none';
+                }
+            });
+
+            console.log('🗺️  像素冒險遊戲已就緒！');
+            console.log('   🎮 方向鍵/WASD 移動 | E/空白鍵 互動');
+            console.log('   💎 地圖上有 ' + TOTAL_TREASURES + ' 個寶箱等你收集！');
+            console.log('   🧑 找到村民對話獲取提示～');
+            console.log('   🗺️  右上角有小地圖輔助導航');
+        })();
+    </script>
+</body>
+</html>
