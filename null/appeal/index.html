@@ -3,18 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appeal Submitted · Vouch Required</title>
+    <title>Appeal Submitted — Vouch Required</title>
     <style>
         :root {
-            --bg-deep: #080814;
-            --card-bg: rgba(15, 18, 32, 0.78);
-            --accent: #2c7be5;
-            --accent-glow: #4d94ff;
-            --gold: #e6b422;
-            --gold-soft: #f0c75e;
-            --text-primary: #e8ecf1;
-            --text-muted: #8892b0;
-            --border-subtle: rgba(255, 255, 255, 0.06);
+            --bg-deep: #080c14;
+            --card-bg: rgba(16, 20, 32, 0.72);
+            --accent: #c8963e;
+            --accent-glow: #e0b860;
+            --accent-soft: #d4a853;
+            --text-primary: #e8e6e0;
+            --text-muted: #9a98a8;
+            --text-dim: #6b6980;
+            --border-subtle: rgba(255, 255, 255, 0.07);
+            --gold: #d4a853;
+            --success: #5cb87a;
+            --input-bg: rgba(10, 12, 22, 0.7);
+            --input-border: rgba(255, 255, 255, 0.12);
+            --input-focus: rgba(212, 168, 83, 0.5);
+            --danger: #c0392b;
+            --shadow-card: 0 8px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+                0 50px 100px -30px rgba(0, 0, 0, 0.6);
+            --radius-lg: 28px;
+            --radius-md: 16px;
+            --radius-sm: 10px;
+            --transition-smooth: 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
         }
 
         * {
@@ -34,9 +46,10 @@
             -webkit-font-smoothing: antialiased;
             cursor: default;
             user-select: none;
+            position: relative;
         }
 
-        /* ---------- 动态背景层 ---------- */
+        /* ============ 动态背景层 ============ */
         .bg-layer {
             position: fixed;
             inset: 0;
@@ -44,39 +57,50 @@
             pointer-events: none;
         }
 
+        /* 光晕球体 */
         .bg-orb {
             position: absolute;
             border-radius: 50%;
             filter: blur(130px);
-            opacity: 0.38;
+            opacity: 0.3;
             animation: orbDrift 20s ease-in-out infinite;
         }
         .bg-orb--1 {
-            width: 750px;
-            height: 750px;
-            background: radial-gradient(circle, rgba(44, 123, 229, 0.45) 0%, transparent 70%);
-            top: -25%;
-            left: -10%;
+            width: 650px;
+            height: 650px;
+            background: radial-gradient(circle, rgba(200, 150, 50, 0.35) 0%, transparent 70%);
+            top: -15%;
+            left: -12%;
             animation-delay: 0s;
-        }
-        .bg-orb--2 {
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(230, 180, 34, 0.35) 0%, transparent 70%);
-            bottom: -30%;
-            right: -12%;
-            animation-delay: -8s;
             animation-duration: 22s;
         }
-        .bg-orb--3 {
+        .bg-orb--2 {
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(90, 140, 240, 0.3) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(40, 70, 140, 0.35) 0%, transparent 70%);
+            bottom: -20%;
+            right: -8%;
+            animation-delay: -8s;
+            animation-duration: 24s;
+        }
+        .bg-orb--3 {
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(180, 130, 40, 0.25) 0%, transparent 70%);
             top: 50%;
-            left: 45%;
+            left: 55%;
             transform: translate(-50%, -50%);
             animation-delay: -14s;
-            animation-duration: 24s;
+            animation-duration: 26s;
+        }
+        .bg-orb--4 {
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(140, 100, 50, 0.22) 0%, transparent 70%);
+            top: 30%;
+            left: 20%;
+            animation-delay: -5s;
+            animation-duration: 19s;
         }
 
         @keyframes orbDrift {
@@ -84,20 +108,24 @@
             100% {
                 transform: translate(0, 0) scale(1);
             }
-            20% {
-                transform: translate(6%, -4%) scale(1.06);
+            17% {
+                transform: translate(6%, -4%) scale(1.07);
             }
-            40% {
-                transform: translate(-5%, 6%) scale(0.93);
+            33% {
+                transform: translate(-3%, 6%) scale(0.93);
             }
-            60% {
-                transform: translate(-6%, -5%) scale(1.04);
+            50% {
+                transform: translate(-7%, -2%) scale(1.04);
             }
-            80% {
-                transform: translate(4%, 5%) scale(0.97);
+            67% {
+                transform: translate(4%, 5%) scale(0.96);
+            }
+            83% {
+                transform: translate(2%, -3%) scale(1.03);
             }
         }
 
+        /* 网格纹理 */
         .grid-texture {
             position: fixed;
             inset: 0;
@@ -105,24 +133,25 @@
             pointer-events: none;
             opacity: 0.035;
             background-image:
-                linear-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.4) 1px, transparent 1px);
-            background-size: 70px 70px;
-            mask-image: radial-gradient(ellipse at center, black 25%, transparent 70%);
-            -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 70%);
+                linear-gradient(rgba(255, 255, 255, 0.45) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.45) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse at center, black 35%, transparent 72%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 35%, transparent 72%);
         }
 
+        /* 细微噪点 */
         .noise-overlay {
             position: fixed;
             inset: 0;
             z-index: 0;
             pointer-events: none;
-            opacity: 0.025;
+            opacity: 0.022;
             background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 180px 180px;
         }
 
-        /* ---------- 粒子画布 ---------- */
+        /* ============ 粒子画布 ============ */
         canvas#particles {
             position: fixed;
             inset: 0;
@@ -130,36 +159,34 @@
             pointer-events: none;
         }
 
-        /* ---------- 主卡片 ---------- */
+        /* ============ 主卡片 ============ */
         .card-wrapper {
             position: relative;
             z-index: 10;
-            perspective: 800px;
+            perspective: 900px;
         }
 
         .card {
             position: relative;
             width: 580px;
             max-width: 93vw;
-            padding: 56px 48px 50px;
+            padding: 54px 46px 48px;
             background: var(--card-bg);
             backdrop-filter: blur(30px) saturate(140%);
             -webkit-backdrop-filter: blur(30px) saturate(140%);
             border: 1px solid var(--border-subtle);
-            border-radius: 32px;
+            border-radius: var(--radius-lg);
             text-align: center;
-            box-shadow:
-                0 10px 45px rgba(0, 0, 0, 0.6),
-                0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-                0 70px 90px -35px rgba(0, 0, 0, 0.7);
-            animation: cardEntry 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            box-shadow: var(--shadow-card);
+            animation: cardEntry 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            transform-origin: center center;
         }
 
         @keyframes cardEntry {
             0% {
                 opacity: 0;
-                transform: translateY(45px) scale(0.93);
-                filter: blur(8px);
+                transform: translateY(38px) scale(0.93);
+                filter: blur(5px);
             }
             100% {
                 opacity: 1;
@@ -168,126 +195,126 @@
             }
         }
 
+        /* 卡片顶部微光 */
         .card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 70%;
+            width: 60%;
             height: 1px;
             background: linear-gradient(90deg,
                     transparent,
-                    rgba(44, 123, 229, 0.3) 20%,
-                    rgba(230, 180, 34, 0.45) 50%,
-                    rgba(44, 123, 229, 0.3) 80%,
+                    rgba(212, 168, 83, 0.22) 25%,
+                    rgba(212, 168, 83, 0.42) 50%,
+                    rgba(212, 168, 83, 0.22) 75%,
                     transparent);
             border-radius: 1px;
         }
 
+        /* 角落金色光点 */
         .card::after {
             content: '';
             position: absolute;
             top: -1px;
             right: -1px;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle at 75% 25%, rgba(44, 123, 229, 0.25) 0%, transparent 70%);
-            border-radius: 0 32px 0 0;
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle at 65% 30%, rgba(200, 150, 50, 0.22) 0%, transparent 70%);
+            border-radius: 0 var(--radius-lg) 0 0;
             pointer-events: none;
             z-index: -1;
         }
 
-        /* ---------- 图标区 ---------- */
+        /* ============ 图标区 ============ */
         .icon-container {
             position: relative;
             display: inline-block;
-            margin-bottom: 30px;
-            animation: iconFloat 4s ease-in-out infinite;
+            margin-bottom: 26px;
+            animation: iconPulse 4s ease-in-out infinite;
         }
 
-        @keyframes iconFloat {
+        @keyframes iconPulse {
             0%,
             100% {
-                transform: translateY(0);
-                filter: drop-shadow(0 0 20px rgba(44, 123, 229, 0.5));
+                transform: scale(1);
+                filter: drop-shadow(0 0 20px rgba(212, 168, 83, 0.4));
             }
             50% {
-                transform: translateY(-6px);
-                filter: drop-shadow(0 0 35px rgba(230, 180, 34, 0.65));
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 35px rgba(224, 184, 96, 0.65));
             }
         }
 
-        .hex-frame {
+        /* 圆形光晕环 */
+        .glow-ring {
             position: absolute;
-            inset: -22px;
-            border: 2px solid rgba(44, 123, 229, 0.25);
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            animation: hexRotate 25s linear infinite;
+            inset: -14px;
+            border-radius: 50%;
+            border: 2px solid rgba(212, 168, 83, 0.25);
+            animation: ringRotate 16s linear infinite;
             pointer-events: none;
         }
-
-        @keyframes hexRotate {
+        @keyframes ringRotate {
             to {
                 transform: rotate(360deg);
             }
         }
+        .glow-ring::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px dashed rgba(212, 168, 83, 0.18);
+            animation: ringRotate 22s linear infinite reverse;
+        }
 
-        .appeal-icon {
-            width: 80px;
-            height: 80px;
+        /* 勾选图标 SVG */
+        .check-icon {
+            position: relative;
+            width: 74px;
+            height: 74px;
             display: inline-block;
         }
-        .appeal-icon svg {
+        .check-icon svg {
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 8px 24px rgba(44, 123, 229, 0.4));
+            filter: drop-shadow(0 6px 22px rgba(92, 184, 122, 0.45));
         }
-        .envelope-outline {
+        .check-icon .circle-outline {
             fill: none;
-            stroke: #8ab4f8;
-            stroke-width: 3;
-            stroke-linejoin: round;
+            stroke: #5cb87a;
+            stroke-width: 2.6;
             stroke-dasharray: 260;
             stroke-dashoffset: 260;
-            animation: envelopeDraw 1s ease-out 0.25s forwards;
+            animation: circleDraw 0.9s ease-out 0.2s forwards;
         }
-        .envelope-flap {
-            fill: none;
-            stroke: #e6b422;
-            stroke-width: 2.8;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            stroke-dasharray: 90;
-            stroke-dashoffset: 90;
-            animation: flapDraw 0.7s ease-out 0.7s forwards;
-        }
-        .check-mark {
-            fill: none;
-            stroke: #e6b422;
-            stroke-width: 4.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            stroke-dasharray: 70;
-            stroke-dashoffset: 70;
-            animation: checkDraw 0.5s ease-out 1.1s forwards;
-        }
-        .key-glow {
-            fill: none;
-            stroke: #e6b422;
-            stroke-width: 2;
+        .check-icon .circle-fill {
+            fill: rgba(92, 184, 122, 0.08);
+            stroke: none;
             opacity: 0;
-            animation: keyAppear 0.6s ease-out 1.4s forwards;
+            animation: fillIn 0.6s ease-out 0.65s forwards;
+        }
+        .check-icon .check-mark {
+            fill: none;
+            stroke: #5cb87a;
+            stroke-width: 3.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: checkDraw 0.45s ease-out 0.85s forwards;
         }
 
-        @keyframes envelopeDraw {
+        @keyframes circleDraw {
             to {
                 stroke-dashoffset: 0;
             }
         }
-        @keyframes flapDraw {
+        @keyframes fillIn {
             to {
-                stroke-dashoffset: 0;
+                opacity: 1;
             }
         }
         @keyframes checkDraw {
@@ -295,55 +322,40 @@
                 stroke-dashoffset: 0;
             }
         }
-        @keyframes keyAppear {
-            0% {
-                opacity: 0;
-                transform: translate(0, 5px);
-            }
-            100% {
-                opacity: 0.9;
-                transform: translate(0, 0);
-            }
-        }
 
-        /* ---------- 文字区 ---------- */
+        /* ============ 文字区 ============ */
         .title {
-            font-size: 1.65rem;
-            font-weight: 650;
+            font-size: 1.55rem;
+            font-weight: 700;
             letter-spacing: 0.03em;
-            color: #f0f2f5;
-            margin-bottom: 10px;
+            color: #f0efe8;
+            margin-bottom: 6px;
             animation: textFadeIn 0.7s ease-out 0.4s both;
         }
         .title .highlight {
-            color: #4d94ff;
-            text-shadow: 0 0 24px rgba(77, 148, 255, 0.4);
+            color: #5cb87a;
+            text-shadow: 0 0 30px rgba(92, 184, 122, 0.5);
         }
 
         .subtitle {
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             font-weight: 400;
             color: var(--text-muted);
-            letter-spacing: 0.03em;
-            margin-bottom: 30px;
-            line-height: 1.6;
-            animation: textFadeIn 0.7s ease-out 0.55s both;
+            letter-spacing: 0.025em;
+            margin-bottom: 28px;
+            line-height: 1.65;
+            animation: textFadeIn 0.7s ease-out 0.5s both;
         }
-        .subtitle .premium-key {
-            font-weight: 700;
-            color: #e6b422;
-            background: rgba(230, 180, 34, 0.08);
-            padding: 2px 8px;
-            border-radius: 5px;
+        .subtitle .em {
+            color: var(--accent-soft);
+            font-weight: 600;
             letter-spacing: 0.04em;
-            white-space: nowrap;
-            border: 1px solid rgba(230, 180, 34, 0.25);
         }
 
         @keyframes textFadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(9px);
             }
             to {
                 opacity: 1;
@@ -351,91 +363,388 @@
             }
         }
 
+        /* 分割线 */
         .divider {
-            width: 65px;
+            width: 55px;
             height: 2px;
             margin: 0 auto 26px;
             background: linear-gradient(90deg,
                     transparent,
-                    rgba(44, 123, 229, 0.65) 30%,
-                    rgba(230, 180, 34, 0.8) 50%,
-                    rgba(44, 123, 229, 0.65) 70%,
+                    rgba(212, 168, 83, 0.55) 35%,
+                    rgba(212, 168, 83, 0.8) 50%,
+                    rgba(212, 168, 83, 0.55) 65%,
                     transparent);
             border-radius: 2px;
-            animation: textFadeIn 0.7s ease-out 0.65s both;
+            animation: textFadeIn 0.7s ease-out 0.6s both;
         }
 
-        .description {
-            font-size: 0.85rem;
-            color: #8892b0;
-            line-height: 1.7;
-            letter-spacing: 0.02em;
-            animation: textFadeIn 0.7s ease-out 0.75s both;
-        }
-
-        .status-tag {
+        /* 邀请按钮 */
+        .btn-vouch {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            margin-top: 26px;
-            font-size: 0.8rem;
-            color: #b0b8d0;
+            gap: 10px;
+            padding: 14px 34px;
+            font-size: 0.95rem;
+            font-weight: 600;
             letter-spacing: 0.04em;
-            animation: textFadeIn 0.7s ease-out 0.85s both;
+            color: #0e0b05;
+            background: linear-gradient(135deg, #d4a853 0%, #c8963e 40%, #b8862d 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 28px rgba(200, 150, 50, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            transition: all var(--transition-smooth);
+            animation: textFadeIn 0.7s ease-out 0.7s both;
+            z-index: 1;
+        }
+        .btn-vouch::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.25) 0%,
+                    transparent 50%,
+                    rgba(255, 255, 255, 0.08) 100%);
+            border-radius: 50px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .btn-vouch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 36px rgba(212, 168, 83, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+            background: linear-gradient(135deg, #e0b860 0%, #d4a853 40%, #c8963e 100%);
+        }
+        .btn-vouch:hover::after {
+            opacity: 1;
+        }
+        .btn-vouch:active {
+            transform: translateY(0) scale(0.97);
+            box-shadow: 0 3px 14px rgba(200, 150, 50, 0.35);
+            transition: all 0.12s ease;
+        }
+        .btn-vouch .btn-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+        .btn-vouch .btn-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 底部提示 */
+        .footer-note {
+            margin-top: 28px;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            letter-spacing: 0.03em;
+            animation: textFadeIn 0.7s ease-out 0.8s both;
         }
         .status-dot {
-            width: 9px;
-            height: 9px;
+            display: inline-block;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
-            background: #e6b422;
-            box-shadow: 0 0 12px #e6b422, 0 0 28px rgba(230, 180, 34, 0.55);
-            animation: dotPulse 1.5s ease-in-out infinite;
+            background: #5cb87a;
+            box-shadow: 0 0 10px #5cb87a, 0 0 22px rgba(92, 184, 122, 0.5);
+            margin-right: 5px;
+            animation: dotBlink 1.6s ease-in-out infinite;
         }
-        @keyframes dotPulse {
+        @keyframes dotBlink {
             0%,
             100% {
                 opacity: 1;
-                transform: scale(1);
             }
             50% {
-                opacity: 0.4;
-                transform: scale(1.25);
+                opacity: 0.3;
             }
         }
 
-        /* ---------- 响应式 ---------- */
+        /* ============ 模态框覆盖层 ============ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(4, 6, 14, 0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            position: relative;
+            width: 440px;
+            max-width: 92vw;
+            padding: 42px 36px 36px;
+            background: rgba(18, 22, 36, 0.85);
+            backdrop-filter: blur(34px) saturate(150%);
+            -webkit-backdrop-filter: blur(34px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            text-align: left;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        .modal-overlay.active .modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #f0efe8;
+            letter-spacing: 0.03em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-title .modal-icon {
+            width: 28px;
+            height: 28px;
+            color: var(--accent-soft);
+        }
+        .modal-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            letter-spacing: 0.02em;
+            line-height: 1.55;
+        }
+
+        /* 表单组 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #c0beb0;
+            letter-spacing: 0.04em;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 13px 16px;
+            font-size: 0.9rem;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'PingFang SC', monospace;
+            letter-spacing: 0.03em;
+            color: #e8e6e0;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: all var(--transition-smooth);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .form-group input::placeholder {
+            color: #5a5870;
+            letter-spacing: 0.02em;
+        }
+        .form-group input:focus {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 3px rgba(212, 168, 83, 0.08), 0 0 20px rgba(212, 168, 83, 0.12);
+            background: rgba(14, 16, 26, 0.8);
+        }
+
+        /* 模态框按钮行 */
+        .modal-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 28px;
+        }
+        .btn {
+            flex: 1;
+            padding: 13px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            border-radius: 50px;
+            cursor: pointer;
+            border: none;
+            transition: all var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            color: #c0beb0;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.22);
+            color: #f0efe8;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #d4a853 0%, #c8963e 50%, #b8862d 100%);
+            color: #0e0b05;
+            box-shadow: 0 4px 20px rgba(200, 150, 50, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .btn-submit:hover {
+            box-shadow: 0 8px 30px rgba(212, 168, 83, 0.45);
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #e0b860 0%, #d4a853 50%, #c8963e 100%);
+        }
+        .btn-submit:active {
+            transform: scale(0.96);
+            transition: all 0.1s ease;
+        }
+
+        /* 成功/错误提示（模态框内） */
+        .modal-feedback {
+            display: none;
+            margin-top: 18px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            letter-spacing: 0.03em;
+            font-weight: 500;
+            animation: fadeInUp 0.3s ease;
+        }
+        .modal-feedback.success {
+            display: block;
+            background: rgba(92, 184, 122, 0.12);
+            border: 1px solid rgba(92, 184, 122, 0.3);
+            color: #7ed69a;
+        }
+        .modal-feedback.error {
+            display: block;
+            background: rgba(200, 60, 50, 0.1);
+            border: 1px solid rgba(200, 60, 50, 0.3);
+            color: #e88;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 关闭按钮X */
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9998a8;
+            transition: all var(--transition-smooth);
+            font-size: 0.85rem;
+            line-height: 1;
+        }
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f0efe8;
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        /* ============ Toast 提示 ============ */
+        .toast {
+            position: fixed;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120px);
+            z-index: 200;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            letter-spacing: 0.03em;
+            pointer-events: none;
+            transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.success {
+            background: rgba(30, 50, 40, 0.85);
+            border: 1px solid rgba(92, 184, 122, 0.4);
+            color: #a0e6b8;
+        }
+        .toast.error {
+            background: rgba(50, 20, 20, 0.85);
+            border: 1px solid rgba(200, 60, 50, 0.4);
+            color: #f0a0a0;
+        }
+
+        /* ============ 响应式 ============ */
         @media (max-width: 600px) {
             .card {
-                padding: 40px 24px 38px;
-                border-radius: 24px;
+                padding: 38px 22px 34px;
+                border-radius: 22px;
             }
             .card::after {
-                border-radius: 0 24px 0 0;
-                width: 60px;
-                height: 60px;
+                border-radius: 0 22px 0 0;
+                width: 55px;
+                height: 55px;
             }
             .title {
-                font-size: 1.35rem;
+                font-size: 1.25rem;
             }
             .subtitle {
-                font-size: 0.9rem;
+                font-size: 0.82rem;
             }
-            .appeal-icon {
-                width: 64px;
-                height: 64px;
+            .btn-vouch {
+                padding: 12px 26px;
+                font-size: 0.85rem;
             }
-            .hex-frame {
-                inset: -16px;
+            .modal {
+                padding: 30px 22px 26px;
+                border-radius: 22px;
+            }
+            .modal-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .check-icon {
+                width: 56px;
+                height: 56px;
+            }
+            .glow-ring {
+                inset: -10px;
             }
         }
     </style>
 </head>
 <body>
+
     <!-- 动态光晕背景 -->
     <div class="bg-layer">
         <div class="bg-orb bg-orb--1"></div>
         <div class="bg-orb bg-orb--2"></div>
         <div class="bg-orb bg-orb--3"></div>
+        <div class="bg-orb bg-orb--4"></div>
     </div>
     <div class="grid-texture"></div>
     <div class="noise-overlay"></div>
@@ -443,27 +752,20 @@
     <!-- 粒子画布 -->
     <canvas id="particles"></canvas>
 
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast"></div>
+
     <!-- 主卡片 -->
     <div class="card-wrapper">
         <div class="card">
-            <!-- 图标：信封 + 对勾 + 钥匙元素 -->
+            <!-- 图标 -->
             <div class="icon-container">
-                <div class="hex-frame"></div>
-                <div class="appeal-icon">
-                    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                        <!-- 信封主体 -->
-                        <rect class="envelope-outline" x="12" y="24" width="56" height="36" rx="4" />
-                        <!-- 信封翻盖 -->
-                        <polyline class="envelope-flap" points="12,24 40,48 68,24" />
-                        <!-- 对勾 -->
-                        <polyline class="check-mark" points="28,44 37,53 52,34" />
-                        <!-- 小型钥匙图案（装饰） -->
-                        <g class="key-glow" transform="translate(58,54) scale(0.45)">
-                            <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="2.5"/>
-                            <line x1="8" y1="15" x2="8" y2="24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                            <line x1="6" y1="20" x2="10" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            <line x1="6" y1="23" x2="9" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </g>
+                <div class="glow-ring"></div>
+                <div class="check-icon">
+                    <svg viewBox="0 0 74 74" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="circle-outline" cx="37" cy="37" r="31" />
+                        <circle class="circle-fill" cx="37" cy="37" r="31" />
+                        <polyline class="check-mark" points="23,38 33,48 52,28" />
                     </svg>
                 </div>
             </div>
@@ -473,38 +775,86 @@
                 Appeal <span class="highlight">Submitted</span>
             </h1>
 
-            <!-- 副标题 / 核心文案 -->
+            <!-- 副标题 -->
             <p class="subtitle">
-                Please invite a user with a<br>
-                <span class="premium-key">🔑 premium key</span> to vouch for you.
+                Please invite a user with a <span class="em">premium key</span><br>to vouch for you.
             </p>
 
             <!-- 分割线 -->
             <div class="divider"></div>
 
-            <!-- 辅助说明 -->
-            <p class="description">
-                Your case is now pending verification.<br>
-                A trusted member with an active premium key must confirm your identity.
+            <!-- 邀请按钮 -->
+            <button class="btn-vouch" id="btnOpenModal" aria-label="Invite a user to vouch">
+                <span class="btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <line x1="19" y1="8" x2="19" y2="14"/>
+                        <line x1="22" y1="11" x2="16" y2="11"/>
+                    </svg>
+                </span>
+                Invite a Vouch
+            </button>
+
+            <!-- 底部状态 -->
+            <p class="footer-note">
+                <span class="status-dot"></span> Appeal status: <strong style="color:#c0beb0;">Awaiting vouch</strong>
             </p>
-            <p class="description" style="margin-top:6px; font-size:0.8rem; color:#6b7394;">
-                Reference: <span style="font-family: monospace; color:#8ab4f8;">VCH-2026-07-17</span>
+        </div>
+    </div>
+
+    <!-- ============ 模态框 ============ -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <!-- 关闭按钮 -->
+            <button class="modal-close" id="btnCloseModal" aria-label="Close modal">&times;</button>
+
+            <!-- 标题 -->
+            <div class="modal-title">
+                <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    <circle cx="12" cy="16" r="1"/>
+                </svg>
+                Vouch Invitation
+            </div>
+            <p class="modal-desc">
+                Enter the credentials of a user who holds a <strong style="color:#d4a853;">premium key</strong> to support your appeal.
             </p>
 
-            <!-- 状态标识 -->
-            <div class="status-tag">
-                <span class="status-dot"></span> Awaiting premium vouch
-            </div>
+            <!-- 表单 -->
+            <form id="vouchForm" autocomplete="off" novalidate>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="e.g. PremiumUser_01" required minlength="2" maxlength="40">
+                </div>
+                <div class="form-group">
+                    <label for="premiumKey">Premium Key</label>
+                    <input type="text" id="premiumKey" name="premiumKey" placeholder="XXXX-XXXX-XXXX-XXXX" required minlength="8" maxlength="40">
+                </div>
+
+                <!-- 反馈信息 -->
+                <div class="modal-feedback" id="modalFeedback"></div>
+
+                <!-- 按钮 -->
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" id="btnCancel">Cancel</button>
+                    <button type="submit" class="btn btn-submit" id="btnSubmit">Submit Vouch</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
         (function() {
+            // ============ 粒子系统 ============
             const canvas = document.getElementById('particles');
             const ctx = canvas.getContext('2d');
             let width, height;
             let particles = [];
-            const PARTICLE_COUNT = 75;
+            const PARTICLE_COUNT = 65;
+            let mouseX = -300;
+            let mouseY = -300;
 
             class Particle {
                 constructor() {
@@ -512,26 +862,35 @@
                 }
                 reset(initial = false) {
                     this.x = Math.random() * width;
-                    this.y = initial ? Math.random() * height : height + 20;
-                    this.size = Math.random() * 2.0 + 0.4;
-                    this.speedY = -(Math.random() * 0.38 + 0.1);
-                    this.speedX = (Math.random() - 0.5) * 0.35;
-                    this.opacity = Math.random() * 0.5 + 0.15;
-                    this.opacityFlicker = Math.random() * 0.018;
-                    // 颜色偏蓝 (200-240) 和金色 (40-55)
-                    this.hue = Math.random() < 0.45 ?
-                        Math.random() * 40 + 200 // 蓝紫色范围
+                    this.y = initial ? Math.random() * height : height + 25;
+                    this.size = Math.random() * 1.6 + 0.35;
+                    this.speedY = -(Math.random() * 0.3 + 0.1);
+                    this.speedX = (Math.random() - 0.5) * 0.28;
+                    this.opacity = Math.random() * 0.5 + 0.18;
+                    this.opacityFlicker = Math.random() * 0.012;
+                    // 金色/暖色为主，少量蓝紫
+                    this.hue = Math.random() < 0.55 ?
+                        Math.random() * 25 + 30 // 金-橙
                         :
-                        Math.random() * 15 + 40; // 金色范围
-                    this.saturation = Math.random() * 35 + 30;
-                    this.lightness = Math.random() * 35 + 50;
+                        Math.random() * 30 + 210; // 蓝紫
+                    this.saturation = Math.random() * 28 + 18;
+                    this.lightness = Math.random() * 38 + 42;
                 }
                 update() {
                     this.y += this.speedY;
                     this.x += this.speedX;
                     this.opacity += (Math.random() - 0.5) * this.opacityFlicker;
-                    this.opacity = Math.max(0.06, Math.min(0.7, this.opacity));
-                    if (this.y < -20 || this.x < -20 || this.x > width + 20) {
+                    this.opacity = Math.max(0.04, Math.min(0.65, this.opacity));
+                    // 鼠标轻微排斥
+                    const dx = this.x - mouseX;
+                    const dy = this.y - mouseY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 90) {
+                        const force = (1 - dist / 90) * 0.55;
+                        this.x += (dx / dist) * force;
+                        this.y += (dy / dist) * force;
+                    }
+                    if (this.y < -25 || this.x < -25 || this.x > width + 25) {
                         this.reset();
                     }
                 }
@@ -540,9 +899,9 @@
                     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                     ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.opacity})`;
                     ctx.fill();
-                    if (this.size > 1.1 && this.opacity > 0.3) {
+                    if (this.size > 0.9 && this.opacity > 0.3) {
                         ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.size * 2.8, 0, Math.PI * 2);
+                        ctx.arc(this.x, this.y, this.size * 2.2, 0, Math.PI * 2);
                         ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.opacity * 0.1})`;
                         ctx.fill();
                     }
@@ -568,19 +927,19 @@
                     p.update();
                     p.draw(ctx);
                 });
-                // 近距离连线
+                // 连线
                 for (let i = 0; i < particles.length; i++) {
                     for (let j = i + 1; j < particles.length; j++) {
                         const dx = particles[i].x - particles[j].x;
                         const dy = particles[i].y - particles[j].y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 90) {
-                            const alpha = (1 - dist / 90) * 0.07;
+                        if (dist < 80) {
+                            const alpha = (1 - dist / 80) * 0.06;
                             ctx.beginPath();
                             ctx.moveTo(particles[i].x, particles[i].y);
                             ctx.lineTo(particles[j].x, particles[j].y);
-                            ctx.strokeStyle = `rgba(138,180,248,${alpha})`;
-                            ctx.lineWidth = 0.6;
+                            ctx.strokeStyle = `rgba(200,170,120,${alpha})`;
+                            ctx.lineWidth = 0.45;
                             ctx.stroke();
                         }
                     }
@@ -589,13 +948,6 @@
             }
 
             window.addEventListener('resize', resize);
-            resize();
-            initParticles();
-            animate();
-
-            // 鼠标轻微排斥效果
-            let mouseX = -200;
-            let mouseY = -200;
             document.addEventListener('mousemove', (e) => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
@@ -607,18 +959,151 @@
                 }
             }, { passive: true });
 
-            const originalUpdate = Particle.prototype.update;
-            Particle.prototype.update = function() {
-                originalUpdate.call(this);
-                const dx = this.x - mouseX;
-                const dy = this.y - mouseY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 110) {
-                    const force = (1 - dist / 110) * 0.55;
-                    this.x += (dx / dist) * force;
-                    this.y += (dy / dist) * force;
+            resize();
+            initParticles();
+            animate();
+
+            // ============ 模态框逻辑 ============
+            const modalOverlay = document.getElementById('modalOverlay');
+            const btnOpenModal = document.getElementById('btnOpenModal');
+            const btnCloseModal = document.getElementById('btnCloseModal');
+            const btnCancel = document.getElementById('btnCancel');
+            const vouchForm = document.getElementById('vouchForm');
+            const usernameInput = document.getElementById('username');
+            const premiumKeyInput = document.getElementById('premiumKey');
+            const modalFeedback = document.getElementById('modalFeedback');
+            const toast = document.getElementById('toast');
+
+            function openModal() {
+                modalOverlay.classList.add('active');
+                // 清空表单
+                vouchForm.reset();
+                modalFeedback.className = 'modal-feedback';
+                modalFeedback.textContent = '';
+                // 聚焦用户名
+                setTimeout(() => usernameInput.focus(), 350);
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modalOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                // 短暂延迟后清空反馈，避免视觉跳动
+                setTimeout(() => {
+                    if (!modalOverlay.classList.contains('active')) {
+                        modalFeedback.className = 'modal-feedback';
+                        modalFeedback.textContent = '';
+                    }
+                }, 400);
+            }
+
+            btnOpenModal.addEventListener('click', openModal);
+            btnCloseModal.addEventListener('click', closeModal);
+            btnCancel.addEventListener('click', closeModal);
+
+            // 点击覆盖层关闭
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    closeModal();
                 }
-            };
+            });
+
+            // ESC 关闭
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+
+            // ============ Toast ============
+            let toastTimer;
+
+            function showToast(message, type = 'success') {
+                clearTimeout(toastTimer);
+                toast.textContent = message;
+                toast.className = 'toast ' + type + ' show';
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2800);
+            }
+
+            // ============ 表单提交 ============
+            vouchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const username = usernameInput.value.trim();
+                const premiumKey = premiumKeyInput.value.trim();
+
+                // 基本验证
+                if (!username || username.length < 2) {
+                    modalFeedback.className = 'modal-feedback error';
+                    modalFeedback.textContent = '⚠ Please enter a valid username (at least 2 characters).';
+                    usernameInput.focus();
+                    return;
+                }
+                if (!premiumKey || premiumKey.length < 8) {
+                    modalFeedback.className = 'modal-feedback error';
+                    modalFeedback.textContent = '⚠ Please enter a valid premium key (at least 8 characters).';
+                    premiumKeyInput.focus();
+                    return;
+                }
+
+                // 模拟提交 - 显示成功
+                modalFeedback.className = 'modal-feedback success';
+                modalFeedback.textContent =
+                    '✓ Vouch invitation sent to ' + username + '. They will be notified shortly.';
+
+                // 禁用提交按钮防止重复
+                const submitBtn = document.getElementById('btnSubmit');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+                submitBtn.style.opacity = '0.7';
+                submitBtn.style.pointerEvents = 'none';
+
+                // 模拟异步请求
+                setTimeout(() => {
+                    // 恢复按钮
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Vouch';
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.pointerEvents = 'auto';
+
+                    // 关闭模态框
+                    closeModal();
+
+                    // 显示全局 Toast
+                    showToast('✓ Vouch invitation has been sent successfully!', 'success');
+
+                    // 清空表单
+                    vouchForm.reset();
+                    modalFeedback.className = 'modal-feedback';
+                    modalFeedback.textContent = '';
+                }, 1600);
+            });
+
+            // ============ 输入时清除错误状态 ============
+            [usernameInput, premiumKeyInput].forEach(input => {
+                input.addEventListener('input', function() {
+                    if (modalFeedback.classList.contains('error')) {
+                        modalFeedback.className = 'modal-feedback';
+                        modalFeedback.textContent = '';
+                    }
+                });
+                // 回车键提交
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        vouchForm.dispatchEvent(new Event('submit', { cancelable: true }));
+                    }
+                });
+            });
+
+            console.log('%c✨ Appeal page ready %c| %cAwaiting vouch invitation',
+                'color:#d4a853;font-weight:bold;',
+                '',
+                'color:#9a98a8;');
+            console.log('%c🔑 Premium key required for vouch process.',
+                'color:#c0beb0;font-style:italic;');
         })();
     </script>
 </body>
